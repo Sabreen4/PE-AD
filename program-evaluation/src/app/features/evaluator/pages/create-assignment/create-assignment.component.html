@@ -1,0 +1,70 @@
+<div class="ca-page">
+  <app-back-nav fallbackRoute="/evaluator/programs"/>
+  <div class="ca-header">
+    <a [routerLink]="['/evaluator/programs', programId, 'weeks', weekId]" class="btn-ghost">&larr; Back to Week</a>
+    <h1 class="ca-title">Create Assignment</h1>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Assignment Details</span>
+    </div>
+    <form [formGroup]="assignmentForm" (ngSubmit)="onSubmit()" class="card-form">
+      <div class="form-group">
+        <label for="title" class="form-label">Assignment Title <span class="required">*</span></label>
+        <input id="title" type="text" formControlName="title" class="form-input" placeholder="e.g. Week 1 Assignment" [class.input-error]="f['title'].invalid && (f['title'].dirty || f['title'].touched)" />
+        @if (f['title'].invalid && (f['title'].dirty || f['title'].touched)) { <div class="validation-error">Title is required.</div> }
+      </div>
+      <div class="form-group">
+        <label for="description" class="form-label">Description / Instructions</label>
+        <textarea id="description" formControlName="description" class="form-input form-textarea" placeholder="Describe the assignment requirements and instructions" rows="4"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="startDate" class="form-label">Start Date &amp; Time <span class="required">*</span></label>
+          <input id="startDate" type="datetime-local" formControlName="startDate" class="form-input" [class.input-error]="f['startDate'].invalid && (f['startDate'].dirty || f['startDate'].touched)" />
+          @if (f['startDate'].invalid && (f['startDate'].dirty || f['startDate'].touched)) { <div class="validation-error">Start date is required.</div> }
+        </div>
+        <div class="form-group">
+          <label for="endDate" class="form-label">Due Date &amp; Time <span class="required">*</span></label>
+          <input id="endDate" type="datetime-local" formControlName="endDate" class="form-input" [class.input-error]="f['endDate'].invalid && (f['endDate'].dirty || f['endDate'].touched)" />
+          @if (f['endDate'].invalid && (f['endDate'].dirty || f['endDate'].touched)) { <div class="validation-error">Due date is required.</div> }
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="maxMarks" class="form-label">Maximum Marks <span class="required">*</span></label>
+          <input id="maxMarks" type="number" formControlName="maxMarks" class="form-input" min="1" [class.input-error]="f['maxMarks'].invalid && (f['maxMarks'].dirty || f['maxMarks'].touched)" />
+          @if (f['maxMarks'].invalid && (f['maxMarks'].dirty || f['maxMarks'].touched)) { <div class="validation-error">Enter valid max marks.</div> }
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="fileType" class="form-label">Allowed File Type</label>
+        <p class="form-hint">Select the file type employees are allowed to upload.</p>
+        @if (isLoadingFileTypes()) {
+          <div class="loading-types"><div class="spinner"></div><span>Loading file types...</span></div>
+        } @else {
+          <p-dropdown
+            id="fileType"
+            [options]="formattedFileTypes()"
+            optionLabel="label"
+            optionValue="key"
+            [ngModel]="selectedFileTypeKey()"
+            (ngModelChange)="selectFileType($event)"
+            [ngModelOptions]="{standalone: true}"
+            placeholder="Any file type"
+            styleClass="w-full">
+          </p-dropdown>
+        }
+      </div>
+      <div class="form-actions">
+        <a [routerLink]="['/evaluator/programs', programId, 'weeks', weekId]" class="btn-secondary">Cancel</a>
+        <button type="submit" class="btn-primary" [disabled]="assignmentForm.invalid || isSubmitting()">
+          @if (isSubmitting()) { <span class="btn-loading"><span class="spinner spinner--white"></span>Creating...</span> }
+          @else { Create Assignment }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

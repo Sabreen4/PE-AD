@@ -1,0 +1,45 @@
+
+    <div class="attendance-container">
+      <app-back-nav fallbackRoute="/" />
+      <div class="filters">
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="statusFilter" (selectionChange)="load()">
+            <mat-option value="">All</mat-option>
+            <mat-option value="Present">Present</mat-option>
+            <mat-option value="Absent">Absent</mat-option>
+            <mat-option value="Late">Late</mat-option>
+            <mat-option value="Half-Day">Half-Day</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="load()">Refresh</button>
+      </div>
+
+      @if (loading()) {
+        <app-loading-spinner />
+      } @else if (records().length === 0) {
+        <app-empty-state message="No attendance records found." />
+      } @else {
+        <table mat-table [dataSource]="records()" class="mat-elevation-z2">
+          <ng-container matColumnDef="employeeName">
+            <th mat-header-cell *matHeaderCellDef>Employee</th>
+            <td mat-cell *matCellDef="let r">{{ r.employeeName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let r">{{ r.date }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let r">{{ r.status }}</td>
+          </ng-container>
+          <ng-container matColumnDef="hoursWorked">
+            <th mat-header-cell *matHeaderCellDef>Hours</th>
+            <td mat-cell *matCellDef="let r">{{ r.hoursWorked ?? '-' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      }
+    </div>
+  

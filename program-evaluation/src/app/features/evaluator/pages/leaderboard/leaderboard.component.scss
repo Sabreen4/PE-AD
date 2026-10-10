@@ -1,0 +1,674 @@
+$lb-primary: #004277;
+$lb-primary-container: #005a9e;
+$lb-primary-fixed: #d3e4ff;
+$lb-on-primary: #ffffff;
+$lb-surface: #f8f9ff;
+$lb-surface-lowest: #ffffff;
+$lb-surface-low: #f2f3fa;
+$lb-surface-container: #ecedf4;
+$lb-surface-high: #e7e8ee;
+$lb-outline-variant: #c1c7d2;
+$lb-outline: #727782;
+$lb-on-surface: #191c20;
+$lb-on-surface-variant: #414750;
+$lb-error: #ba1a1a;
+$lb-green-700: #2e7d32;
+$lb-green-50: #e8f5e9;
+$lb-gold: #d4af37;
+$lb-silver: #c0c0c0;
+$lb-bronze: #cd7f32;
+
+:host {
+  display: block;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: $lb-surface;
+  min-height: 100vh;
+}
+
+.lb-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+.lb-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.lb-header-left {
+  max-width: 480px;
+}
+
+.lb-title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  color: $lb-on-surface;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.lb-subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: $lb-on-surface-variant;
+  line-height: 1.5;
+
+  strong {
+    color: $lb-primary;
+  }
+}
+
+.lb-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lb-program-select {
+  position: relative;
+  min-width: 200px;
+}
+
+.lb-select {
+  width: 100%;
+  padding: 9px 32px 9px 12px;
+  border: 1px solid $lb-outline-variant;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: $lb-on-surface;
+  background: $lb-surface-lowest;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+
+  &:focus {
+    border-color: $lb-primary;
+    box-shadow: 0 0 0 3px rgba($lb-primary, 0.1);
+  }
+}
+
+.lb-select-chevron {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: $lb-outline;
+  pointer-events: none;
+}
+
+.lb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.lb-btn--outline {
+  background: transparent;
+  color: $lb-on-surface-variant;
+  border: 1px solid $lb-outline-variant;
+
+  &:hover:not(:disabled) {
+    background: $lb-surface-low;
+    border-color: $lb-outline;
+  }
+}
+
+.lb-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 24px;
+  gap: 12px;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: $lb-outline;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: $lb-on-surface;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: $lb-on-surface-variant;
+    max-width: 400px;
+  }
+}
+
+.lb-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid $lb-outline-variant;
+  border-top-color: $lb-primary;
+  border-radius: 50%;
+  animation: lb-spin 0.6s linear infinite;
+}
+
+@keyframes lb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.lb-podium {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+  align-items: stretch;
+
+  @media (min-width: 640px) {
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: stretch;
+  }
+}
+
+.lb-podium--partial {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.lb-podium-card {
+  background: $lb-surface-lowest;
+  border: 1px solid $lb-outline-variant;
+  border-radius: 16px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+}
+
+.lb-podium-card--gold {
+  box-shadow: 0 0 28px rgba($lb-gold, 0.25);
+  border-color: rgba($lb-gold, 0.5);
+  border-width: 2px;
+}
+
+.lb-podium-card--silver {
+  box-shadow: 0 0 20px rgba($lb-silver, 0.2);
+  border-color: rgba($lb-silver, 0.4);
+}
+
+.lb-podium-card--bronze {
+  box-shadow: 0 0 20px rgba($lb-bronze, 0.2);
+  border-color: rgba($lb-bronze, 0.4);
+}
+
+.lb-podium-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+
+  .lb-podium-card--gold & {
+    background: $lb-gold;
+    height: 6px;
+  }
+
+  .lb-podium-card--silver & {
+    background: $lb-silver;
+  }
+
+  .lb-podium-card--bronze & {
+    background: $lb-bronze;
+  }
+}
+
+.lb-podium-crown {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+
+  mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: rgba($lb-gold, 0.2);
+  }
+}
+
+.lb-podium-avatar {
+  margin-bottom: 12px;
+}
+
+.lb-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+
+  .lb-podium-card--gold & {
+    width: 80px;
+    height: 80px;
+    font-size: 24px;
+  }
+}
+
+.lb-avatar--gold {
+  background: rgba($lb-gold, 0.15);
+  color: darken($lb-gold, 20%);
+  box-shadow: 0 0 0 4px rgba($lb-gold, 0.3);
+}
+
+.lb-avatar--silver {
+  background: rgba($lb-silver, 0.2);
+  color: darken($lb-silver, 40%);
+  box-shadow: 0 0 0 4px rgba($lb-silver, 0.3);
+}
+
+.lb-avatar--bronze {
+  background: rgba($lb-bronze, 0.2);
+  color: darken($lb-bronze, 20%);
+  box-shadow: 0 0 0 4px rgba($lb-bronze, 0.3);
+}
+
+.lb-podium-rank {
+  display: inline-block;
+  padding: 3px 12px;
+  background: $lb-surface-high;
+  color: $lb-on-surface-variant;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.lb-podium-rank--gold {
+  background: $lb-primary-fixed;
+  color: $lb-primary;
+}
+
+.lb-podium-name {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+  color: $lb-on-surface;
+
+  .lb-podium-card--gold & {
+    font-size: 22px;
+  }
+}
+
+.lb-podium-name--gold {
+  font-size: 22px;
+}
+
+.lb-podium-score {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: $lb-primary;
+
+  .lb-podium-card--gold & {
+    font-size: 36px;
+  }
+}
+
+.lb-podium-score--gold {
+  font-size: 36px;
+}
+
+.lb-card {
+  background: $lb-surface-lowest;
+  border: 1px solid $lb-outline-variant;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.lb-table-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid $lb-outline-variant;
+}
+
+.lb-search-wrap {
+  position: relative;
+  max-width: 360px;
+}
+
+.lb-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: $lb-outline;
+  pointer-events: none;
+}
+
+.lb-search-input {
+  width: 100%;
+  padding: 8px 32px 8px 32px;
+  border: 1px solid $lb-outline-variant;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: $lb-on-surface;
+  background: $lb-surface-lowest;
+  outline: none;
+
+  &:focus {
+    border-color: $lb-primary;
+    box-shadow: 0 0 0 3px rgba($lb-primary, 0.1);
+  }
+
+  &::placeholder {
+    color: $lb-outline;
+  }
+}
+
+.lb-search-clear {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  color: $lb-outline;
+
+  &:hover {
+    background: $lb-surface-high;
+  }
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.lb-table-wrap {
+  overflow-x: auto;
+}
+
+.lb-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lb-th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: $lb-on-surface-variant;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid $lb-outline-variant;
+  background: $lb-surface-low;
+  white-space: nowrap;
+}
+
+.lb-th--name {
+  min-width: 200px;
+}
+
+.lb-th--num {
+  text-align: center;
+}
+
+.lb-tr {
+  transition: background 0.1s;
+
+  &:hover {
+    background: rgba($lb-primary, 0.03);
+  }
+
+  &:last-child .lb-td {
+    border-bottom: none;
+  }
+}
+
+.lb-td {
+  padding: 12px 14px;
+  border-bottom: 1px solid $lb-outline-variant;
+  font-size: 14px;
+  color: $lb-on-surface;
+  vertical-align: middle;
+}
+
+.lb-td--rank {
+  width: 60px;
+}
+
+.lb-td--name {
+  min-width: 200px;
+}
+
+.lb-td--num {
+  text-align: center;
+}
+
+.lb-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: $lb-surface-container;
+  color: $lb-on-surface-variant;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lb-rank-badge--gold {
+  background: rgba($lb-gold, 0.15);
+  color: darken($lb-gold, 20%);
+}
+
+.lb-rank-badge--silver {
+  background: rgba($lb-silver, 0.2);
+  color: darken($lb-silver, 40%);
+}
+
+.lb-rank-badge--bronze {
+  background: rgba($lb-bronze, 0.2);
+  color: darken($lb-bronze, 20%);
+}
+
+.lb-employee {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lb-avatar-sm {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: $lb-surface-container;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: $lb-on-surface-variant;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.lb-emp-name {
+  margin: 0;
+  font-weight: 600;
+  color: $lb-on-surface;
+  font-size: 14px;
+}
+
+.lb-score-val {
+  font-weight: 700;
+  color: $lb-primary;
+  font-size: 16px;
+}
+
+.lb-percentile {
+  font-weight: 500;
+  color: $lb-on-surface-variant;
+}
+
+.lb-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.lb-flag--positive {
+  background: $lb-green-50;
+  color: $lb-green-700;
+}
+
+.lb-flag--neutral {
+  background: $lb-surface-container;
+  color: $lb-on-surface-variant;
+}
+
+.lb-flag--negative {
+  background: #fdecea;
+  color: $lb-error;
+}
+
+.lb-table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid $lb-outline-variant;
+  background: $lb-surface-low;
+}
+
+.lb-footer-text {
+  font-size: 12px;
+  color: $lb-on-surface-variant;
+}
+
+.lb-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+
+  @media (min-width: 600px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (min-width: 900px) {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+}
+
+.lb-stat-card {
+  background: $lb-surface-lowest;
+  border: 1px solid $lb-outline-variant;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.lb-stat-label {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: $lb-on-surface-variant;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.lb-stat-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.lb-stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: $lb-on-surface;
+}
+
+.lb-stat-value--alert {
+  color: $lb-error;
+}
+
+.lb-stat-trend {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.lb-stat-trend--up {
+  color: $lb-green-700;
+}
+
+.lb-stat-trend--down {
+  color: $lb-error;
+}

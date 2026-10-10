@@ -1,0 +1,65 @@
+<header class="navbar">
+  <div class="navbar__mobile-left">
+    <button class="navbar__hamburger" (click)="toggleMobileNav.emit()" title="Open menu">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <span class="navbar__brand-mobile">PE&DA</span>
+  </div>
+
+  <div class="navbar__right">
+    <div class="navbar__mode-toggle">
+      <button
+        class="navbar__mode-btn"
+        [class.navbar__mode-btn--active]="!themeService.isDarkMode()"
+        (click)="themeService.isDarkMode() && themeService.toggleDarkMode()"
+        title="Light mode"
+      >
+        <mat-icon>light_mode</mat-icon>
+      </button>
+      <button
+        class="navbar__mode-btn"
+        [class.navbar__mode-btn--active]="themeService.isDarkMode()"
+        (click)="!themeService.isDarkMode() && themeService.toggleDarkMode()"
+        title="Dark mode"
+      >
+        <mat-icon>dark_mode</mat-icon>
+      </button>
+    </div>
+
+    <app-notification-bell />
+
+    <div class="navbar__profile-wrap">
+      <button class="navbar__profile" (click)="toggleDropdown()">
+        <span class="navbar__avatar">{{ initials() }}</span>
+        <span class="navbar__profile-info">
+          <span class="navbar__profile-name">{{ displayName() }}</span>
+          <span class="navbar__profile-role">{{ user()?.role ?? '' }}</span>
+        </span>
+        <mat-icon class="navbar__chevron">expand_more</mat-icon>
+      </button>
+
+      @if (dropdownOpen()) {
+        <div class="nv-dropdown">
+          <div class="nv-dropdown__head">
+            <span class="nv-dropdown__avatar">{{ initials() }}</span>
+            <div class="nv-dropdown__user">
+              <span class="nv-dropdown__name">{{ displayName() }}</span>
+              <span class="nv-dropdown__role">{{ user()?.role ?? '' }}</span>
+            </div>
+          </div>
+          <div class="nv-dropdown__body">
+            <button class="nv-dropdown__item" (click)="goToProfile()">
+              <mat-icon>person</mat-icon>
+              <span>Profile</span>
+            </button>
+            <div class="nv-dropdown__divider"></div>
+            <button class="nv-dropdown__item nv-dropdown__item--danger" (click)="logout()">
+              <mat-icon>logout</mat-icon>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</header>

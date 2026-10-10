@@ -1,0 +1,109 @@
+<div class="eval-page">
+  <app-back-nav fallbackRoute="/evaluator"/>
+  <div class="eval-header">
+    <p class="eval-eyebrow">Attendance</p>
+    <h1 class="eval-title">Manage Attendance</h1>
+    <p class="eval-subtitle">Track and manage employee attendance for today: <strong>{{ attendanceDate() }}</strong></p>
+  </div>
+
+  @if (isLoading() && attendanceRows().length === 0) {
+    <div class="state-box"><div class="spinner"></div><span>Loading...</span></div>
+  } @else {
+    <div class="filter-row">
+      <div class="filter-group">
+        <label class="filter-label">Program</label>
+        <p-dropdown
+          [options]="programs()"
+          optionLabel="name"
+          optionValue="id"
+          [ngModel]="selectedProgramId()"
+          (ngModelChange)="onProgramChange($event)"
+          placeholder="Select a program"
+          styleClass="w-full">
+        </p-dropdown>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Program Week</label>
+        <p-dropdown
+          [options]="formattedWeeks()"
+          optionLabel="label"
+          optionValue="id"
+          [ngModel]="selectedWeekId()"
+          (ngModelChange)="onWeekChange($event)"
+          placeholder="Select a week"
+          styleClass="w-full">
+        </p-dropdown>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Employee Search</label>
+        <div class="search-wrapper">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            #attSearchInput
+            type="text"
+            class="search-input"
+            placeholder="Search by employee name..."
+            (input)="onSearchInput($event)" />
+          @if (searchQuery()) {
+            <button class="search-clear" (click)="clearSearch(attSearchInput)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (selectedProgramId() && selectedWeekId() && attendanceRows().length > 0) {
+      <div class="attendance-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="col-employee">Employee</th>
+              <th class="col-date">Date</th>
+              <th class="col-status">Status</th>
+              <th class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of paginatedRows(); track row.enrollmentId) {
+              <tr>
+                <td class="col-employee">{{ row.employeeName }}</td>
+                <td class="col-date">{{ row.date }}</td>
+                <td class="col-status">
+                  @if (row.marked) {
+                    <span class="stamp stamp--success">Present</span>
+                  } @else {
+                    <span class="stamp stamp--neutral">Not marked</span>
+                  }
+                </td>
+                <td class="col-actions">
+                  <button class="btn-sm btn-sm--success" (click)="markPresent(row.enrollmentId)" [disabled]="row.saving || row.marked">
+                    @if (row.saving) { <span class="spinner-sm"></span> } @else { Present }
+                  </button>
+                  <button class="btn-sm btn-sm--danger" (click)="markAbsent(row.enrollmentId)" [disabled]="row.saving">
+                    Absent
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-pagination
+        [currentPage]="currentPage()"
+        [totalRecords]="totalRecords()"
+        [pageSize]="pageSize()"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="onPageSizeChange($event)" />
+    } @else if (selectedProgramId() && selectedWeekId() && attendanceRows().length === 0 && !isLoading()) {
+      <div class="state-box state-empty">
+        <h3>No enrollments</h3>
+        <p>No employees are enrolled in this program.</p>
+      </div>
+    }
+  }
+</div>

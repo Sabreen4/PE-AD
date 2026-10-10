@@ -1,0 +1,43 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form">
+    @for (field of data.fields; track field.key) {
+      <mat-form-field appearance="outline" class="full-width">
+        @switch (field.type) {
+          @case ('select') {
+            <mat-label>{{ field.label }}</mat-label>
+            <mat-select [formControlName]="field.key">
+              @for (opt of field.options || []; track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          }
+          @case ('checkbox') {
+            <mat-checkbox [formControlName]="field.key">{{ field.label }}</mat-checkbox>
+          }
+          @case ('textarea') {
+            <mat-label>{{ field.label }}</mat-label>
+            <textarea matInput [formControlName]="field.key" [placeholder]="field.placeholder || ''"></textarea>
+          }
+          @case ('date') {
+            <mat-label>{{ field.label }}</mat-label>
+            <input matInput [matDatepicker]="picker" [formControlName]="field.key">
+            <mat-datepicker-toggle matSuffix [for]="picker" />
+            <mat-datepicker #picker />
+          }
+          @default {
+            <mat-label>{{ field.label }}</mat-label>
+            <input matInput [formControlName]="field.key" [type]="field.type" [placeholder]="field.placeholder || ''">
+          }
+        }
+        @if (field.hint) {
+          <mat-hint>{{ field.hint }}</mat-hint>
+        }
+      </mat-form-field>
+    }
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="save()">{{ data.submitText || 'Save' }}</button>
+</mat-dialog-actions>

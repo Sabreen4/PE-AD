@@ -1,0 +1,14 @@
+<div class="page">
+  <app-back-nav fallbackRoute="/"/>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">{{ labels.pageEyebrow }}</div>
+      <h2>{{ labels.pageTitle }}</h2>
+    </div>
+  </div>
+
+  <div class="welcome-card card">
+    <p class="welcome-text">{{ labels.welcomePrefix }} {{ user()?.email }}</p>
+    <p class="welcome-org">{{ labels.subtitle }}</p>
+  </div>
+</div>

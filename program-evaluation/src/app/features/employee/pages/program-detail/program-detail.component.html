@@ -1,0 +1,171 @@
+<div class="pd-page">
+  <app-back-nav fallbackRoute="/employee/programs" />
+  @if (isLoading()) {
+    <div class="pd-loading">
+      <div class="pd-loading-card"></div>
+      <div class="pd-loading-card"></div>
+      <div class="pd-loading-card"></div>
+    </div>
+  } @else if (isForbidden()) {
+    <div class="pd-error-banner pd-error-banner--forbidden">
+      <span class="material-symbols-outlined">lock</span>
+      <div>
+        <h3>Access Denied</h3>
+        <p>{{ errorMessage() }} Please contact your evaluator or administrator if you believe this is a mistake.</p>
+      </div>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="pd-error-banner">
+      <span class="material-symbols-outlined">error_outline</span>
+      <p>{{ errorMessage() }}</p>
+    </div>
+  } @else {
+    @let prog = program();
+    @if (prog) {
+      <!-- Hero Header -->
+      <section class="pd-hero">
+        <button class="pd-back" (click)="goBack()">
+          <span class="material-symbols-outlined">arrow_back</span>
+          Back to Programs
+        </button>
+        <div class="pd-hero-body">
+          <div class="pd-hero-info">
+            <div class="pd-hero-badges">
+              <span class="pd-badge pd-badge--active">Active Program</span>
+              @if (enrollment(); as enr) {
+                <span class="pd-badge pd-badge--enroll">Enroll ID: #{{ enr.id }}</span>
+              }
+            </div>
+            <h1 class="pd-hero-title">{{ prog.name }}</h1>
+            <p class="pd-hero-desc">{{ prog.description || 'No description available.' }}</p>
+            <div class="pd-hero-meta">
+              <span class="pd-meta-item">
+                <span class="material-symbols-outlined">calendar_today</span>
+                Week {{ currentWeekNum() }} of {{ totalWeeks() }}
+              </span>
+              <span class="pd-meta-item">
+                <span class="material-symbols-outlined">group</span>
+                {{ totalWeeks() }} Weeks
+              </span>
+            </div>
+          </div>
+          <div class="pd-progress-block">
+            <div class="pd-progress-header">
+              <span class="pd-progress-label">Overall Progress</span>
+              <span class="pd-progress-pct">{{ progressPercent() }}%</span>
+            </div>
+            <div class="pd-progress-track">
+              <div class="pd-progress-fill" [style.width.%]="progressPercent()"></div>
+            </div>
+            <div class="pd-progress-stats">
+              <span>{{ completedWeeks() }} of {{ totalWeeks() }} weeks completed</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Learning Journey Timeline -->
+      <div class="pd-timeline">
+        <h2 class="pd-section-title">
+          <span class="material-symbols-outlined">timeline</span>
+          Learning Journey
+        </h2>
+        @for (week of sortedWeeks(); track week.id; let last = $last) {
+          <div class="pd-tl-item">
+            <div class="pd-tl-line" [class.pd-tl-line--hidden]="last"></div>
+            <div class="pd-tl-icon" [class.pd-tl-icon--done]="weekStatus(week) === 'completed'"
+                 [class.pd-tl-icon--current]="weekStatus(week) === 'current'"
+                 [class.pd-tl-icon--locked]="weekStatus(week) === 'upcoming'">
+              @if (weekStatus(week) === 'completed') {
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+              } @else if (weekStatus(week) === 'current') {
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+              } @else {
+                <span class="material-symbols-outlined">lock</span>
+              }
+            </div>
+            <a [routerLink]="['/employee/programs', programId, 'weeks', week.id]"
+               class="pd-tl-card"
+               [class.pd-tl-card--current]="weekStatus(week) === 'current'"
+               [class.pd-tl-card--locked]="weekStatus(week) === 'upcoming'">
+              <div class="pd-tl-card-header">
+                <h3 class="pd-tl-week-title">Week {{ week.weekNumber }}: {{ week.topic || 'Untitled' }}</h3>
+                <span class="pd-tl-badge"
+                      [class.pd-tl-badge--completed]="weekStatus(week) === 'completed'"
+                      [class.pd-tl-badge--current]="weekStatus(week) === 'current'"
+                      [class.pd-tl-badge--locked]="weekStatus(week) === 'upcoming'">
+                  @if (weekStatus(week) === 'completed') { Completed }
+                  @else if (weekStatus(week) === 'current') { In Progress }
+                  @else { Locked }
+                </span>
+              </div>
+              <p class="pd-tl-desc">{{ week.description || 'No description for this week.' }}</p>
+              <div class="pd-tl-metrics">
+                @let wAssignments = weekAssignments(week.id);
+                @if (wAssignments.length > 0) {
+                  <div class="pd-tl-metric">
+                    <span class="pd-tl-metric-label">Assignments</span>
+                    <span class="pd-tl-metric-value">{{ wAssignments.length }}</span>
+                  </div>
+                }
+                <div class="pd-tl-metric">
+                  <span class="pd-tl-metric-label">Status</span>
+                  <span class="pd-tl-metric-value">
+                    @if (weekStatus(week) === 'completed') { Done }
+                    @else if (weekStatus(week) === 'current') { Active }
+                    @else { — }
+                  </span>
+                </div>
+              </div>
+              @if (weekStatus(week) === 'current' && hasActiveAssignment(week.id)) {
+                <div class="pd-tl-action">
+                  <span class="pd-tl-action-text">Assignment Available</span>
+                  <span class="material-symbols-outlined">arrow_forward</span>
+                </div>
+              }
+            </a>
+          </div>
+        }
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="pd-stats">
+        <div class="pd-stat-card">
+          <div class="pd-stat-header">
+            <span class="material-symbols-outlined pd-stat-icon pd-stat-icon--primary">fact_check</span>
+            <span class="pd-stat-label">Weeks Completed</span>
+          </div>
+          <p class="pd-stat-value">{{ completedWeeks() }} <span class="pd-stat-unit">/ {{ totalWeeks() }}</span></p>
+          <p class="pd-stat-trend pd-stat-trend--up">
+            <span class="material-symbols-outlined">trending_up</span>
+            {{ progressPercent() }}% overall progress
+          </p>
+        </div>
+        <div class="pd-stat-card">
+          <div class="pd-stat-header">
+            <span class="material-symbols-outlined pd-stat-icon pd-stat-icon--secondary">assignment</span>
+            <span class="pd-stat-label">Total Assignments</span>
+          </div>
+          <p class="pd-stat-value">{{ assignments().length }}</p>
+          <p class="pd-stat-sub">Across {{ sortedWeeks().length }} weeks</p>
+        </div>
+        <div class="pd-stat-card">
+          <div class="pd-stat-header">
+            <span class="material-symbols-outlined pd-stat-icon pd-stat-icon--tertiary">calendar_view_week</span>
+            <span class="pd-stat-label">Current Week</span>
+          </div>
+          <p class="pd-stat-value">Week {{ currentWeekNum() }}</p>
+          <p class="pd-stat-sub">{{ enrollment()?.currentWeek ? 'Actively enrolled' : 'Not enrolled' }}</p>
+        </div>
+        <div class="pd-stat-card">
+          <div class="pd-stat-header">
+            <span class="material-symbols-outlined pd-stat-icon pd-stat-icon--success">award_star</span>
+            <span class="pd-stat-label">Status</span>
+          </div>
+          <p class="pd-stat-value">{{ enrollment() ? 'Enrolled' : 'Not Enrolled' }}</p>
+          <p class="pd-stat-sub">{{ prog.isActive ? 'Active' : 'Inactive' }}</p>
+        </div>
+      </div>
+    }
+  }
+</div>

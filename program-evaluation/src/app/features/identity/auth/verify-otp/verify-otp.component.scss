@@ -1,0 +1,242 @@
+/* ---- Form header ---- */
+.form-header {
+  margin-bottom: 28px;
+}
+
+.form-heading {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.form-description {
+  font-size: 14px;
+  color: var(--color-ink-faint);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ---- Progress steps ---- */
+.progress-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.step-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-ui);
+  transition: all 0.2s;
+}
+
+.progress-step.completed .step-circle {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.progress-step.active .step-circle {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.step-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+}
+
+.progress-step.active .step-label {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.step-connector {
+  width: 24px;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* ---- Verify form ---- */
+.verify-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.otp-boxes {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.otp-box {
+  width: 56px;
+  height: 64px;
+  text-align: center;
+  font-size: 28px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--color-ink);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+  caret-color: var(--color-primary);
+}
+
+.otp-box:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(33, 70, 78, 0.1);
+  transform: translateY(-1px);
+}
+
+.otp-box-filled {
+  border-color: var(--color-primary);
+  background: #f4f7f7;
+}
+
+.otp-box-error {
+  border-color: var(--color-danger);
+  animation: shake 0.3s ease-in-out;
+}
+
+.otp-box-error:focus {
+  box-shadow: 0 0 0 3px rgba(162, 59, 50, 0.12);
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+/* ---- Button ---- */
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0 24px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(33, 70, 78, 0.2);
+  transition: all 0.15s;
+  width: 100%;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  box-shadow: 0 6px 16px rgba(33, 70, 78, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---- Links ---- */
+.auth-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font-ui);
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
+
+.link-button:disabled {
+  color: var(--color-ink-muted);
+  cursor: not-allowed;
+}
+
+.link-separator {
+  color: var(--color-border);
+  font-size: 14px;
+}
+
+.auth-link {
+  font-size: 13px;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}

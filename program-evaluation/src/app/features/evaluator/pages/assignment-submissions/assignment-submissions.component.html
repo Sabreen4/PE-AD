@@ -1,0 +1,292 @@
+<div class="as-page">
+  <app-back-nav fallbackRoute="/evaluator"/>
+  <div class="as-header">
+    <h1 class="as-title">Assignment Submissions</h1>
+    <p class="as-subtitle">Review, download, and score employee assignment submissions across your programs.</p>
+  </div>
+
+  <div class="as-filters">
+    <div class="as-filter-group">
+      <label class="as-filter-label">Program</label>
+      <p-dropdown
+        [options]="programs()"
+        optionLabel="name"
+        optionValue="id"
+        [ngModel]="selectedProgramId()"
+        (ngModelChange)="onProgramChange($event)"
+        placeholder="Select Program"
+        styleClass="w-full">
+      </p-dropdown>
+    </div>
+    <div class="as-filter-group">
+      <label class="as-filter-label">Week</label>
+      <p-dropdown
+        [options]="formattedWeeks()"
+        optionLabel="label"
+        optionValue="id"
+        [ngModel]="selectedWeekId()"
+        (ngModelChange)="onWeekChange($event)"
+        placeholder="All Weeks"
+        styleClass="w-full">
+      </p-dropdown>
+    </div>
+    <div class="as-filter-group">
+      <label class="as-filter-label">Employee</label>
+      <div class="as-search-wrap">
+        <mat-icon class="as-search-icon">search</mat-icon>
+        <input #asSearchInput class="as-search-input" type="text" placeholder="Search by name..." (input)="onSearchInput($event)" />
+        @if (searchQuery()) {
+          <button class="as-search-clear" (click)="onSearch(''); asSearchInput.value = ''">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+    </div>
+    <div class="as-filter-actions">
+      <label class="as-filter-label">&nbsp;</label>
+      <button class="as-btn as-btn--primary" (click)="loadSubmissions()" [disabled]="!selectedProgramId() || isLoading()">
+        @if (isLoading()) {
+          <span class="as-spinner-sm"></span> Loading...
+        } @else {
+          <mat-icon>refresh</mat-icon> Load Submissions
+        }
+      </button>
+    </div>
+  </div>
+
+  @if (isLoading() && allRows().length === 0) {
+    <div class="as-state">
+      <div class="as-spinner"></div>
+      <span>Loading submissions...</span>
+    </div>
+  } @else if (!selectedProgramId()) {
+    <div class="as-state as-state--select">
+      <mat-icon>playlist_add_check</mat-icon>
+      <h3>Select a program</h3>
+      <p>Choose a program above and click "Load Submissions" to view assignment submissions.</p>
+    </div>
+  } @else if (allRows().length === 0 && !isLoading()) {
+    <div class="as-state as-state--empty">
+      <mat-icon>assignment</mat-icon>
+      <h3>No submissions found</h3>
+      <p>There are no assignment submissions for the selected filters.</p>
+    </div>
+  } @else if (filteredRows().length > 0) {
+    <div class="as-toolbar">
+      <div class="as-toolbar-info">
+        @if (anyUnsaved()) {
+          <span class="as-unsaved-badge">{{ unsavedCount() }} unsaved</span>
+        }
+      </div>
+      <div class="as-toolbar-actions">
+        @if (anyUnsaved()) {
+          <button class="as-btn as-btn--primary" (click)="evaluateAllPending()" [disabled]="isEvaluating()">
+            @if (isEvaluating()) {
+              <span class="as-spinner-sm"></span> Saving...
+            } @else {
+              <mat-icon>save</mat-icon> Save All Pending
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="as-card">
+      <div class="as-table-wrap">
+        <table class="as-table">
+          <thead>
+            <tr>
+              <th class="as-th as-th--emp">Employee</th>
+              <th class="as-th">Program</th>
+              <th class="as-th">Week</th>
+              <th class="as-th as-th--assign">Assignment</th>
+              <th class="as-th">Due Date</th>
+              <th class="as-th">Submitted</th>
+              <th class="as-th">Status</th>
+              <th class="as-th">File</th>
+              <th class="as-th as-th--score">Score</th>
+              <th class="as-th as-th--comment">Comment</th>
+              <th class="as-th as-th--action">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of paginatedRows(); track row.id) {
+              <tr class="as-tr" [class.as-tr--evaluated]="row.marks != null" (click)="openDetail(row)" style="cursor:pointer">
+                <td class="as-td as-td--emp">
+                  <div class="as-employee">
+                    <div class="as-avatar">{{ row.employeeName.charAt(0) }}</div>
+                    <div class="as-employee-info">
+                      <span class="as-emp-name">{{ row.employeeName }}</span>
+                      @if (row.employeeEmail) {
+                        <span class="as-emp-email">{{ row.employeeEmail }}</span>
+                      }
+                    </div>
+                  </div>
+                </td>
+                <td class="as-td">
+                  <span class="as-cell-text" [title]="row.programName">{{ row.programName }}</span>
+                </td>
+                <td class="as-td">
+                  <span class="as-cell-text" [title]="'Week ' + row.weekNumber + (row.weekTitle ? ' - ' + row.weekTitle : '')">
+                    Week {{ row.weekNumber }}{{ row.weekTitle ? ' — ' + row.weekTitle : '' }}
+                  </span>
+                </td>
+                <td class="as-td">
+                  <span class="as-cell-text as-assignment-title" [title]="row.assignmentTitle">{{ row.assignmentTitle }}</span>
+                </td>
+                <td class="as-td">{{ row.dueDate ? (row.dueDate | date:'mediumDate') : '—' }}</td>
+                <td class="as-td">{{ row.submittedAt ? (row.submittedAt | date:'medium') : '—' }}</td>
+                <td class="as-td">
+                  <span class="as-stamp" [class.as-stamp--success]="row.status === 'submitted' || row.status === 'evaluated'" [class.as-stamp--neutral]="row.status === 'pending'">
+                    {{ row.status || 'pending' }}
+                  </span>
+                </td>
+                <td class="as-td">
+                  @if (row.fileName) {
+                    <div class="as-file-actions">
+                      <span class="as-file-name" [title]="row.fileName">{{ row.fileName }}</span>
+                      <button class="as-file-btn" title="Download file" (click)="downloadFile(row); $event.stopPropagation()">
+                        <mat-icon>download</mat-icon>
+                      </button>
+                    </div>
+                  } @else {
+                    <span class="as-no-file">No file</span>
+                  }
+                </td>
+                <td class="as-td as-td--score">
+                  <input type="number" class="as-score-input" min="0" [max]="row.maxMarks"
+                    [placeholder]="'0-' + row.maxMarks"
+                    (input)="updateMarks(row.id, $any($event.target).value)"
+                    (click)="$event.stopPropagation()"
+                    [value]="getPendingData(row.id)?.marks ?? row.marks ?? ''" />
+                </td>
+                <td class="as-td as-td--comment">
+                  <input type="text" class="as-comment-input" placeholder="Add comment"
+                    (input)="updateComment(row.id, $any($event.target).value)"
+                    (click)="$event.stopPropagation()"
+                    [value]="getPendingData(row.id)?.reviewerComment ?? row.reviewerComment ?? ''" />
+                </td>
+                <td class="as-td as-td--action">
+                  @if (getPendingData(row.id)) {
+                    <button class="as-btn-sm as-btn-sm--primary" (click)="evaluate(row); $event.stopPropagation()" [disabled]="isEvaluating()">
+                      @if (isEvaluating()) { <span class="as-spinner-xs"></span> }
+                      @else { Save }
+                    </button>
+                  } @else if (row.marks != null) {
+                    <button class="as-btn-sm as-btn-sm--outline" (click)="startEdit(row); $event.stopPropagation()">
+                      Edit
+                    </button>
+                  } @else {
+                    <span class="as-no-input">Enter score</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <app-pagination
+      [currentPage]="currentPage()"
+      [totalRecords]="totalRecords()"
+      [pageSize]="pageSize()"
+      [isLoading]="isLoading()"
+      (pageChange)="goToPage($event)"
+      (pageSizeChange)="onPageSizeChange($event)" />
+  }
+
+  @if (selectedRow(); as row) {
+    <div class="as-overlay" (click)="closeDetail()">
+      <div class="as-detail-modal" (click)="$event.stopPropagation()">
+        <div class="as-detail-head">
+          <div class="as-detail-head-left">
+            <div class="as-detail-avatar">{{ row.employeeName.charAt(0) }}</div>
+            <div>
+              <h2 class="as-detail-title">{{ row.employeeName }}</h2>
+              @if (row.employeeEmail) {
+                <p class="as-detail-subtitle">{{ row.employeeEmail }}</p>
+              }
+            </div>
+          </div>
+          <button class="as-detail-close" (click)="closeDetail()" type="button" title="Close">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="as-detail-body">
+          <div class="as-detail-section">
+            <h3 class="as-detail-section-title">Submission Info</h3>
+            <div class="as-detail-grid">
+              <div class="as-detail-field">
+                <span class="as-detail-label">Program</span>
+                <span class="as-detail-value">{{ row.programName }}</span>
+              </div>
+              <div class="as-detail-field">
+                <span class="as-detail-label">Week</span>
+                <span class="as-detail-value">Week {{ row.weekNumber }}{{ row.weekTitle ? ' — ' + row.weekTitle : '' }}</span>
+              </div>
+              <div class="as-detail-field">
+                <span class="as-detail-label">Assignment</span>
+                <span class="as-detail-value">{{ row.assignmentTitle }}</span>
+              </div>
+              <div class="as-detail-field">
+                <span class="as-detail-label">Status</span>
+                <span class="as-stamp" [class.as-stamp--success]="row.status === 'submitted' || row.status === 'evaluated'" [class.as-stamp--neutral]="row.status === 'pending'">
+                  {{ row.status || 'pending' }}
+                </span>
+              </div>
+              <div class="as-detail-field">
+                <span class="as-detail-label">Due Date</span>
+                <span class="as-detail-value">{{ row.dueDate ? (row.dueDate | date:'mediumDate') : '—' }}</span>
+              </div>
+              <div class="as-detail-field">
+                <span class="as-detail-label">Submitted</span>
+                <span class="as-detail-value">{{ row.submittedAt ? (row.submittedAt | date:'medium') : '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="as-detail-section">
+            <h3 class="as-detail-section-title">File</h3>
+            @if (row.fileName) {
+              <div class="as-detail-file">
+                <span class="as-detail-file-name">{{ row.fileName }}</span>
+                <button class="as-btn-sm as-btn-sm--outline" (click)="downloadFile(row)">
+                  <mat-icon style="font-size:14px;width:14px;height:14px;">download</mat-icon>
+                  Download
+                </button>
+              </div>
+            } @else {
+              <span class="as-no-file">No file submitted</span>
+            }
+          </div>
+
+          <div class="as-detail-section">
+            <h3 class="as-detail-section-title">Evaluation</h3>
+            <div class="as-detail-grid">
+              <div class="as-detail-field">
+                <span class="as-detail-label">Score</span>
+                <span class="as-detail-value">
+                  @if (row.marks != null) {
+                    <span class="as-marks-display">{{ row.marks }} / {{ row.maxMarks }}</span>
+                  } @else {
+                    <span class="as-no-input">Not evaluated</span>
+                  }
+                </span>
+              </div>
+              <div class="as-detail-field as-detail-field--full">
+                <span class="as-detail-label">Evaluator Comment</span>
+                <span class="as-detail-value">{{ row.reviewerComment || '—' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="as-detail-footer">
+          <button class="as-btn-sm as-btn-sm--ghost" (click)="closeDetail()">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

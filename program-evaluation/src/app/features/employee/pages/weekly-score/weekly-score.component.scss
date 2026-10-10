@@ -1,0 +1,139 @@
+$clr-primary: #004277;
+$clr-primary-container: #005a9e;
+$clr-primary-fixed: #d3e4ff;
+$clr-on-primary: #ffffff;
+$clr-surface: #f8f9ff;
+$clr-surface-low: #f2f3fa;
+$clr-surface-lowest: #ffffff;
+$clr-outline-variant: #c1c7d2;
+$clr-outline: #727782;
+$clr-on-surface: #191c20;
+$clr-on-surface-variant: #414750;
+$clr-error: #ba1a1a;
+$clr-green: #2e7d32;
+$clr-amber: #b8860b;
+$font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: $font;
+}
+.ws-header-card {
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(244, 247, 254, 0.9) 100%);
+  border: 1px solid var(--color-border, #c1c7d2);
+  border-radius: var(--radius-xl, 16px);
+  padding: 24px;
+  box-shadow: 0 4px 20px -4px rgba(28, 43, 46, 0.05);
+}
+
+.ws-header-main {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.ws-header-info {
+  flex: 1;
+}
+
+.ws-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-ink, #191c20);
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.ws-subtitle {
+  font-size: 14px;
+  color: var(--color-ink-muted, #566166);
+  margin: 6px 0 0;
+  font-weight: 400;
+}
+
+.ws-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.ws-filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 220px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+.ws-filter-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-primary, #21464e);
+}
+
+.as-dropdown-control {
+  width: 100% !important;
+
+  .p-dropdown {
+    width: 100% !important;
+    height: 44px !important;
+    background: #FFFFFF !important;
+    border: 1.5px solid var(--color-border, #c1c7d2) !important;
+    border-radius: 10px !important;
+
+    &:hover {
+      border-color: var(--color-primary, #21464e) !important;
+    }
+  }
+}
+
+.notification { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+.notification--error { background: #fdecea; color: $clr-error; border: 1px solid rgba($clr-error, .15); }
+
+.score-card { background: $clr-surface-lowest; border: 1px solid $clr-outline-variant; border-radius: 12px; overflow: hidden; }
+.score-card-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: $clr-surface-low; border-bottom: 1px solid $clr-outline-variant; }
+.score-card-title { font-size: 14px; font-weight: 600; color: $clr-on-surface; }
+.score-card-body { padding: 20px; }
+.score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.score-item { display: flex; flex-direction: column; gap: 4px; }
+.score-item--highlight { background: $clr-primary-fixed; border-radius: 8px; padding: 12px; }
+.score-item--full { grid-column: 1 / -1; }
+.score-label { font-size: 12px; font-weight: 500; color: $clr-on-surface-variant; text-transform: uppercase; letter-spacing: .3px; }
+.score-value { font-size: 22px; font-weight: 700; color: $clr-on-surface; }
+.score-value--badge { font-size: 18px; }
+.score-value--large { font-size: 28px; }
+
+.status-badge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.status-badge--success { background: #e8f5e9; color: $clr-green; }
+
+.text-green { color: $clr-green; }
+.text-amber { color: $clr-amber; }
+.text-red { color: $clr-error; }
+
+.state-box { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 64px 24px; color: $clr-on-surface-variant; font-size: 14px; text-align: center; }
+.state-empty h3, .state-select h3 { margin: 0; font-size: 16px; color: $clr-on-surface; }
+.state-empty p, .state-select p { margin: 4px 0 0; font-size: 13px; color: $clr-on-surface-variant; }
+.spinner { width: 18px; height: 18px; border: 2px solid $clr-outline-variant; border-top-color: $clr-primary; border-radius: 50%; animation: spin .6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

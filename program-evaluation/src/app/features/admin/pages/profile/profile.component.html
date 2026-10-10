@@ -1,0 +1,79 @@
+<div class="modal-overlay" (click)="close()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-head-left">
+        <div class="modal-avatar">{{ (authState.user()?.email ?? 'A').charAt(0).toUpperCase() }}</div>
+        <div>
+          <h2 class="modal-title">Edit Profile</h2>
+          <p class="modal-subtitle">Update your personal information</p>
+        </div>
+      </div>
+      <button class="modal-close" (click)="close()" type="button" title="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <div class="modal-loading">
+        <div class="spinner"></div>
+        <span>Loading profile...</span>
+      </div>
+    } @else {
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="modal-form">
+        <div class="modal-body">
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="firstName" class="form-label">First name <span class="required">*</span></label>
+              <input id="firstName" type="text" formControlName="firstName" class="form-input"
+                placeholder="Enter first name"
+                [class.input-error]="f['firstName'].invalid && (f['firstName'].dirty || f['firstName'].touched)" />
+              @if (f['firstName'].invalid && (f['firstName'].dirty || f['firstName'].touched)) {
+                <div class="validation-error">First name is required.</div>
+              }
+            </div>
+            <div class="form-group">
+              <label for="lastName" class="form-label">Last name <span class="required">*</span></label>
+              <input id="lastName" type="text" formControlName="lastName" class="form-input"
+                placeholder="Enter last name"
+                [class.input-error]="f['lastName'].invalid && (f['lastName'].dirty || f['lastName'].touched)" />
+              @if (f['lastName'].invalid && (f['lastName'].dirty || f['lastName'].touched)) {
+                <div class="validation-error">Last name is required.</div>
+              }
+            </div>
+          </div>
+
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="email" class="form-label">Email</label>
+              <input id="email" type="email" formControlName="email" class="form-input form-input--disabled" [disabled]="true" />
+              <div class="field-hint">Email cannot be changed.</div>
+            </div>
+            <div class="form-group">
+              <label for="phone" class="form-label">Phone</label>
+              <input id="phone" type="tel" formControlName="phone" class="form-input"
+                placeholder="10-digit phone number"
+                [class.input-error]="f['phone'].invalid && (f['phone'].dirty || f['phone'].touched)" />
+              @if (f['phone'].invalid && (f['phone'].dirty || f['phone'].touched)) {
+                <div class="validation-error">Must be exactly 10 digits.</div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="close()">Cancel</button>
+          <button type="submit" class="btn-primary" [disabled]="profileForm.invalid || isSaving()">
+            @if (isSaving()) {
+              <span class="btn-loading">
+                <span class="spinner spinner--white"></span>
+                Saving...
+              </span>
+            } @else {
+              Save Changes
+            }
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

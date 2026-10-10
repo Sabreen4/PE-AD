@@ -1,0 +1,23 @@
+
+    .confirm-overlay { padding: 24px; min-width: 360px; }
+    .confirm-title { font-size: 18px; font-weight: 700; color: var(--color-ink); margin: 0 0 8px; }
+    .confirm-message { font-size: 14px; color: var(--color-ink-muted); margin: 0 0 24px; line-height: 1.5; }
+    .confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .btn {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--color-primary);
+      color: #fff;
+      transition: background 0.12s;
+    }
+    .btn:hover { background: #1a3a40; }
+    .btn--ghost { background: transparent; color: var(--color-ink-muted); }
+    .btn--ghost:hover { background: var(--color-surface-sunken); color: var(--color-ink); }
+    .btn--danger { background: var(--color-danger); }
+    .btn--danger:hover { background: #8a2f28; }
+  

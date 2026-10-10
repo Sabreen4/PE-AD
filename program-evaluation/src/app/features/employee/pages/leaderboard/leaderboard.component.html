@@ -1,0 +1,166 @@
+<div class="emp-page">
+  <app-back-nav fallbackRoute="/employee" />
+
+  <!-- Header Card with Program Dropdown -->
+  <div class="lb-header-card">
+    <div class="lb-header-main">
+      <div class="lb-header-info">
+        <h1 class="lb-title">
+          <mat-icon class="lb-title-icon">leaderboard</mat-icon>
+          Program Leaderboard
+        </h1>
+        <p class="lb-subtitle">See how you rank among your peers and track top performers</p>
+      </div>
+
+      @if (!isLoadingPrograms() && programs().length > 0) {
+        <div class="lb-program-filter">
+          <label class="lb-filter-label">Program Track</label>
+          <p-dropdown
+            [options]="programs()"
+            optionLabel="name"
+            optionValue="id"
+            [ngModel]="selectedProgramId()"
+            (ngModelChange)="onProgramChange($event)"
+            placeholder="Choose a program..."
+            styleClass="as-dropdown-control">
+          </p-dropdown>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (isLoadingPrograms()) {
+    <div class="state-box"><div class="spinner"></div><span>Loading programs...</span></div>
+  } @else {
+    @if (isLoading()) {
+      <div class="state-box"><div class="spinner"></div><span>Loading leaderboard...</span></div>
+    } @else if (selectedProgramId() && entries().length === 0) {
+      <div class="state-box state-empty">
+        <mat-icon class="empty-icon">workspace_premium</mat-icon>
+        <h3>No rankings yet</h3>
+        <p>Leaderboard data is not available for this program.</p>
+      </div>
+    } @else if (entries().length > 0) {
+
+      <!-- Top 3 Podium Cards -->
+      @if (topThree().length > 0) {
+        <div class="lb-podium">
+          @if (topThree().length >= 2) {
+            @let rankTwoItem = topThree()[1];
+            <div class="lb-podium-card lb-podium-card--silver" [class.is-me-card]="rankTwoItem.employeeId === userId()">
+              <div class="lb-podium-rank-badge">Rank #2</div>
+              <div class="lb-podium-avatar lb-podium-avatar--silver">🥈</div>
+              <h3 class="lb-podium-name">
+                {{ rankTwoItem.employeeName }}
+                @if (rankTwoItem.employeeId === userId()) { <span class="you-pill">You</span> }
+              </h3>
+              <p class="lb-podium-score">{{ rankTwoItem.overallScore }} pts</p>
+              <span class="lb-podium-pct">{{ rankTwoItem.percentile }}th Percentile</span>
+            </div>
+          }
+
+          @if (topThree().length >= 1) {
+            @let rankOneItem = topThree()[0];
+            <div class="lb-podium-card lb-podium-card--gold" [class.is-me-card]="rankOneItem.employeeId === userId()">
+              <div class="lb-podium-crown">
+                <mat-icon>workspace_premium</mat-icon>
+              </div>
+              <div class="lb-podium-rank-badge lb-podium-rank-badge--gold">Rank #1</div>
+              <div class="lb-podium-avatar lb-podium-avatar--gold">🥇</div>
+              <h3 class="lb-podium-name">
+                {{ rankOneItem.employeeName }}
+                @if (rankOneItem.employeeId === userId()) { <span class="you-pill">You</span> }
+              </h3>
+              <p class="lb-podium-score">{{ rankOneItem.overallScore }} pts</p>
+              <span class="lb-podium-pct">{{ rankOneItem.percentile }}th Percentile</span>
+            </div>
+          }
+
+          @if (topThree().length >= 3) {
+            @let rankThreeItem = topThree()[2];
+            <div class="lb-podium-card lb-podium-card--bronze" [class.is-me-card]="rankThreeItem.employeeId === userId()">
+              <div class="lb-podium-rank-badge">Rank #3</div>
+              <div class="lb-podium-avatar lb-podium-avatar--bronze">🥉</div>
+              <h3 class="lb-podium-name">
+                {{ rankThreeItem.employeeName }}
+                @if (rankThreeItem.employeeId === userId()) { <span class="you-pill">You</span> }
+              </h3>
+              <p class="lb-podium-score">{{ rankThreeItem.overallScore }} pts</p>
+              <span class="lb-podium-pct">{{ rankThreeItem.percentile }}th Percentile</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Current Employee Highlight Banner -->
+      @if (myEntry(); as me) {
+        <div class="lb-my-rank-banner">
+          <div class="lb-my-rank-left">
+            <div class="lb-my-rank-badge">#{{ me.rank }}</div>
+            <div class="lb-my-rank-info">
+              <span class="lb-my-rank-title">Your Current Ranking</span>
+              <span class="lb-my-rank-score">{{ me.overallScore }} pts &bull; Top {{ me.percentile }}%</span>
+            </div>
+          </div>
+          <div class="lb-my-rank-tag">
+            <mat-icon>person</mat-icon>
+            <span>You</span>
+          </div>
+        </div>
+      }
+
+      <!-- Search & Table -->
+      <div class="search-wrapper" style="margin-bottom: 1rem;">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          #lbSearchInput
+          type="text"
+          class="search-input"
+          placeholder="Search by employee name..."
+          (input)="onSearchInput($event)" />
+        @if (searchQuery()) {
+          <button class="search-clear" (click)="clearSearch(lbSearchInput)">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+
+      <div class="lb-table-wrap">
+        <table class="lb-table">
+          <thead>
+            <tr>
+              <th class="lb-col-rank">Rank</th>
+              <th class="lb-col-name">Name</th>
+              <th class="lb-col-score">Overall Score</th>
+              <th class="lb-col-pct">Percentile</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of paginatedEntries(); track e.employeeId) {
+              <tr [class.is-me]="e.employeeId === userId()">
+                <td class="lb-col-rank">
+                  <span class="rank-badge" [class.top-1]="e.rank === 1" [class.top-2]="e.rank === 2" [class.top-3]="e.rank === 3">
+                    {{ e.rank }}
+                  </span>
+                </td>
+                <td class="lb-col-name">
+                  {{ e.employeeName }}
+                  @if (e.employeeId === userId()) { <span class="you-tag">You</span> }
+                </td>
+                <td class="lb-col-score">{{ e.overallScore }} pts</td>
+                <td class="lb-col-pct">{{ e.percentile }}%</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <app-pagination
+        [currentPage]="currentPage()"
+        [totalRecords]="totalRecords()"
+        [pageSize]="pageSize()"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="onPageSizeChange($event)" />
+    }
+  }
+</div>

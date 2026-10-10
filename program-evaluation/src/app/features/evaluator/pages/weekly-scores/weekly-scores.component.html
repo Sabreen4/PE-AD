@@ -1,0 +1,215 @@
+<div class="ws-page">
+  <app-back-nav fallbackRoute="/evaluator"/>
+  <div class="ws-topbar">
+    <div class="ws-top-actions">
+      <button class="ws-btn ws-btn--outline" (click)="exportCsv()" [disabled]="scoreRows().length === 0">
+        <mat-icon>download</mat-icon> Export CSV
+      </button>
+      <button class="ws-btn ws-btn--primary" (click)="saveAll()" [disabled]="!hasUnsaved() || isSaving() || isLoading()">
+        @if (isSaving()) {
+          <span class="ws-spinner-sm"></span> Saving...
+        } @else {
+          <mat-icon>save</mat-icon> Save Scores
+        }
+      </button>
+    </div>
+  </div>
+
+  <div class="ws-header">
+    <h1 class="ws-title">Weekly Scoring</h1>
+    @if (selectedWeek(); as week) {
+      <p class="ws-subtitle">
+        Update performance metrics for Week {{ week.weekNumber }}
+        @if (week.startDate) {
+          : {{ week.startDate | date:'MMM d' }} – {{ week.endDate | date:'MMM d, yyyy' }}
+        }
+      </p>
+    } @else {
+      <p class="ws-subtitle">Select a program and week to begin scoring.</p>
+    }
+  </div>
+
+  <div class="ws-filters">
+    <div class="ws-filter-group">
+      <label class="ws-filter-label">Program</label>
+      <p-dropdown
+        [options]="programs()"
+        optionLabel="name"
+        optionValue="id"
+        [ngModel]="selectedProgramId()"
+        (ngModelChange)="onProgramChange($event)"
+        placeholder="Select Program"
+        styleClass="w-full">
+      </p-dropdown>
+    </div>
+    <div class="ws-filter-group">
+      <label class="ws-filter-label">Week</label>
+      <p-dropdown
+        [options]="formattedWeeks()"
+        optionLabel="label"
+        optionValue="id"
+        [ngModel]="selectedWeekId()"
+        (ngModelChange)="onWeekChange($event)"
+        placeholder="Select Week"
+        styleClass="w-full">
+      </p-dropdown>
+    </div>
+    <div class="ws-filter-group">
+      <label class="ws-filter-label">Employee</label>
+      <div class="ws-search-wrap">
+        <mat-icon class="ws-search-icon">search</mat-icon>
+        <input #wsSearchInput class="ws-search-input" type="text" placeholder="Search by name..."
+          (input)="onSearchInput($event)" />
+        @if (searchQuery()) {
+          <button class="ws-search-clear" (click)="clearSearch(wsSearchInput)">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (isLoading() && scoreRows().length === 0) {
+    <div class="ws-state">
+      <div class="ws-spinner"></div>
+      <span>Loading enrolled employees...</span>
+    </div>
+  } @else if (selectedProgramId() && selectedWeekId()) {
+    @if (filteredScoreRows().length === 0 && !isLoading()) {
+      <div class="ws-state ws-state--empty">
+        <mat-icon>people_outline</mat-icon>
+        @if (searchQuery()) {
+          <h3>No matching employees</h3>
+          <p>Try adjusting the name filter to see more results.</p>
+        } @else {
+          <h3>No enrolled employees</h3>
+          <p>There are no employees enrolled in this program for the selected week.</p>
+        }
+      </div>
+    } @else if (filteredScoreRows().length > 0) {
+      <div class="ws-card">
+        <div class="ws-scale-header">
+          <span class="ws-scale-label">Scoring Scale: 1 (Low) to 3 (Exemplary)</span>
+        </div>
+        <div class="ws-table-wrap">
+          <table class="ws-table">
+            <thead>
+              <tr>
+                <th class="ws-th ws-th--employee">Employee</th>
+                <th class="ws-th ws-th--score">
+                  <span class="ws-th-label">Attendance</span>
+                  <span class="ws-th-sub">Punctuality &amp; Presence</span>
+                </th>
+                <th class="ws-th ws-th--score">
+                  <span class="ws-th-label">Engagement</span>
+                  <span class="ws-th-sub">Participation &amp; Focus</span>
+                </th>
+                <th class="ws-th ws-th--score">
+                  <span class="ws-th-label">Application</span>
+                  <span class="ws-th-sub">Skill Implementation</span>
+                </th>
+                <th class="ws-th ws-th--avg">Weekly Avg</th>
+                <th class="ws-th ws-th--status">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of paginatedScoreRows(); track row.enrollmentId) {
+                <tr class="ws-tr" [class.ws-tr--saved]="row.hasEvaluation">
+                  <td class="ws-td ws-td--employee">
+                    <div class="ws-employee">
+                      <div class="ws-avatar">{{ row.employeeName.charAt(0) }}{{ row.employeeName.split(' ').pop()?.charAt(0) }}</div>
+                      <div>
+                        <span class="ws-emp-name">{{ row.employeeName }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="ws-td ws-td--score">
+                    <span class="ws-score-badge ws-score-badge--readonly">{{ row.attendanceScore }}</span>
+                  </td>
+                  <td class="ws-td ws-td--score">
+                    <div class="ws-btn-group">
+                      @for (val of [1, 2, 3]; track val) {
+                        <button class="ws-score-btn"
+                          [class.ws-score-btn--active]="row.engagementScore === val"
+                          [class.ws-score-btn--disabled]="row.hasEvaluation || row.saving"
+                          (click)="setEngagement(row.enrollmentId, val)"
+                          [disabled]="row.hasEvaluation || row.saving">
+                          {{ val }}
+                        </button>
+                      }
+                    </div>
+                  </td>
+                  <td class="ws-td ws-td--score">
+                    <div class="ws-btn-group">
+                      @for (val of [1, 2, 3]; track val) {
+                        <button class="ws-score-btn"
+                          [class.ws-score-btn--active]="row.applicationScore === val"
+                          [class.ws-score-btn--disabled]="row.hasEvaluation || row.saving"
+                          (click)="setApplication(row.enrollmentId, val)"
+                          [disabled]="row.hasEvaluation || row.saving">
+                          {{ val }}
+                        </button>
+                      }
+                    </div>
+                  </td>
+                  <td class="ws-td ws-td--avg">
+                    <span class="ws-avg" [class.ws-avg--high]="row.weeklyAverage >= 2.5"
+                          [class.ws-avg--mid]="row.weeklyAverage >= 1.5 && row.weeklyAverage < 2.5"
+                          [class.ws-avg--low]="row.weeklyAverage < 1.5">
+                      {{ row.weeklyAverage.toFixed(1) }}
+                    </span>
+                  </td>
+                  <td class="ws-td ws-td--status">
+                    @if (row.saving) {
+                      <span class="ws-status ws-status--saving">Saving...</span>
+                    } @else if (row.hasEvaluation) {
+                      <span class="ws-status ws-status--saved">Saved</span>
+                    } @else {
+                      <span class="ws-status ws-status--pending">Pending</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <app-pagination
+          [currentPage]="currentPage()"
+          [totalRecords]="totalRecords()"
+          [pageSize]="pageSize()"
+          (pageChange)="goToPage($event)"
+          (pageSizeChange)="onPageSizeChange($event)" />
+      </div>
+
+      <div class="ws-guidance">
+        <div class="ws-guidance-item">
+          <mat-icon>info</mat-icon>
+          <div>
+            <strong>Auto-Save</strong>
+            <p>Changes are cached locally but must be committed using the 'Save Scores' button.</p>
+          </div>
+        </div>
+        <div class="ws-guidance-item">
+          <mat-icon>priority_high</mat-icon>
+          <div>
+            <strong>Threshold Alerts</strong>
+            <p>Averages below 1.5 will trigger an automatic supervisor review flag.</p>
+          </div>
+        </div>
+        <div class="ws-guidance-item">
+          <mat-icon>history</mat-icon>
+          <div>
+            <strong>History</strong>
+            <p>Previous weeks are locked. Request an unlock from the Admin Console if needed.</p>
+          </div>
+        </div>
+      </div>
+    }
+  } @else if (!isLoading()) {
+    <div class="ws-state ws-state--select">
+      <mat-icon>playlist_add_check</mat-icon>
+      <h3>Select a program and week</h3>
+      <p>Choose a program and week above to start scoring employee performance.</p>
+    </div>
+  }
+</div>

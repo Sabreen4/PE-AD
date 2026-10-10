@@ -1,0 +1,341 @@
+<div class="as-page">
+  <app-back-nav fallbackRoute="/employee" />
+  <!-- Header & Program Selector Row -->
+  <div class="as-header-card">
+    <div class="as-header-main">
+      <div class="as-header-info">
+        <h1 class="as-title">
+          <mat-icon class="as-title-icon">assignment</mat-icon>
+          My Assignments
+        </h1>
+        <p class="as-subtitle">Track, submit, and review your program evaluations.</p>
+      </div>
+      <div class="as-program-filter">
+        <label class="as-program-label">Program Track</label>
+        <p-dropdown
+          [options]="programs()"
+          optionLabel="name"
+          optionValue="id"
+          [ngModel]="selectedProgramId()"
+          (ngModelChange)="onProgramChange($event)"
+          placeholder="Choose a program..."
+          styleClass="as-dropdown-control">
+        </p-dropdown>
+      </div>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="as-loading-state">
+      <div class="as-metrics-skeleton">
+        @for (_ of [1,2,3,4]; track _) {
+          <p-skeleton width="100%" height="80px" borderRadius="12px" />
+        }
+      </div>
+      @for (_ of [1,2,3]; track _) {
+        <p-skeleton width="100%" height="180px" borderRadius="12px" styleClass="as-card-skeleton" />
+      }
+    </div>
+  } @else {
+
+    @if (isForbidden()) {
+      <div class="as-error-banner">
+        <mat-icon>lock</mat-icon>
+        <div>
+          <h3>Access Denied</h3>
+          <p>{{ errorMessage() }}</p>
+        </div>
+      </div>
+    }
+
+    @if (selectedProgramId() && !isForbidden()) {
+      @if (isLoadingCards()) {
+        <div class="as-loading-state">
+          <div class="as-metrics-skeleton">
+            @for (_ of [1,2,3,4]; track _) {
+              <p-skeleton width="100%" height="80px" borderRadius="12px" />
+            }
+          </div>
+          @for (_ of [1,2,3]; track _) {
+            <p-skeleton width="100%" height="180px" borderRadius="12px" styleClass="as-card-skeleton" />
+          }
+        </div>
+      } @else {
+        @let m = metrics();
+        <!-- Metrics Row -->
+        <div class="as-metrics">
+          <div class="as-metric-card">
+            <div class="as-metric-header">
+              <mat-icon class="as-metric-icon as-metric-icon--pending">pending_actions</mat-icon>
+              <span class="as-metric-label">Pending Tasks</span>
+            </div>
+            <div class="as-metric-value-row">
+              <span class="as-metric-value">{{ m.pending }}</span>
+              @if (m.expired > 0) {
+                <span class="as-metric-badge as-metric-badge--overdue">{{ m.expired }} Overdue</span>
+              }
+            </div>
+          </div>
+          <div class="as-metric-card">
+            <div class="as-metric-header">
+              <mat-icon class="as-metric-icon as-metric-icon--rate">trending_up</mat-icon>
+              <span class="as-metric-label">Completion Rate</span>
+            </div>
+            <div class="as-metric-value-row">
+              <span class="as-metric-value">{{ m.completionRate }}%</span>
+              <div class="as-progress-track">
+                <div class="as-progress-fill" [style.width.%]="m.completionRate"></div>
+              </div>
+            </div>
+          </div>
+          <div class="as-metric-card">
+            <div class="as-metric-header">
+              <mat-icon class="as-metric-icon as-metric-icon--score">star</mat-icon>
+              <span class="as-metric-label">Average Score</span>
+            </div>
+            <div class="as-metric-value-row">
+              <span class="as-metric-value">{{ m.avgScore }}</span>
+              @if (m.avgScore > 0) {
+                <span class="as-metric-badge as-metric-badge--score">/ 100</span>
+              }
+            </div>
+          </div>
+          <div class="as-metric-card as-metric-card--highlight">
+            <div class="as-metric-header">
+              <mat-icon class="as-metric-icon">event</mat-icon>
+              <span class="as-metric-label">Next Deadline</span>
+            </div>
+            <div class="as-metric-value-row">
+              <span class="as-metric-value as-metric-value--sm">
+                @if (m.earliestDue) {
+                  {{ m.earliestDue.assignment.endDate | date:'MMM d, yyyy' }}
+                } @else {
+                  —
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Bar -->
+        @let counts = tabCounts();
+        <div class="as-tabs">
+          @for (tab of tabs; track tab.key) {
+            <button class="as-tab" [class.as-tab--active]="activeFilter() === tab.key" (click)="setFilter(tab.key)">
+              {{ tab.label }}
+              <span class="as-tab-count" [class.as-tab-count--active]="activeFilter() === tab.key">{{ tabCountForKey(tab.key) }}</span>
+            </button>
+          }
+        </div>
+
+        <!-- Cards Grid -->
+        @if (filteredCards().length === 0) {
+          <div class="as-empty">
+            <mat-icon class="as-empty-icon">inbox</mat-icon>
+            <h3 class="as-empty-title">No assignments found</h3>
+            <p class="as-empty-desc">There are no assignments matching the "{{ activeFilter() | titlecase }}" filter tab.</p>
+          </div>
+        } @else {
+          <div class="as-grid">
+            @for (card of filteredCards(); track card.assignment.id) {
+              @let key = card.week.id + '-' + card.assignment.id;
+              @let state = getSubmitState(card);
+              <p-card class="as-card" [class.as-card--expired]="card.status === 'expired'" [class.as-card--upcoming]="card.status === 'upcoming'" [class.as-card--submitted]="card.status === 'submitted' || card.status === 'reviewed'">
+                <ng-template pTemplate="content">
+                  <div class="as-card-inner">
+                    <!-- Title, Badges, and Status Tag Row -->
+                    <div class="as-card-top-row">
+                      <div class="as-card-title-block">
+                        <h3 class="as-card-title">{{ card.assignment.title || 'Untitled Assignment' }}</h3>
+                        <div class="as-card-badges">
+                          <span class="as-badge as-badge--program">{{ card.program.name }}</span>
+                          <span class="as-badge as-badge--week">Week {{ card.week.weekNumber }}: {{ card.week.topic || 'Week ' + card.week.weekNumber }}</span>
+                          @if (card.videoAvailable) {
+                            <span class="as-badge as-badge--video" (click)="showVideo(card); $event.stopPropagation()">
+                              <mat-icon>play_circle</mat-icon>
+                              Session
+                            </span>
+                          }
+                        </div>
+                      </div>
+                      <p-tag
+                        [value]="statusDisplay(card.status)"
+                        [severity]="statusSeverity(card.status)"
+                        [rounded]="true"
+                      />
+                    </div>
+
+                    @if (card.assignment.description) {
+                      <p class="as-card-desc">{{ card.assignment.description }}</p>
+                    }
+
+                    <div class="as-card-meta">
+                      <div class="as-meta-item">
+                        <mat-icon class="as-meta-icon">calendar_today</mat-icon>
+                        <span class="as-meta-label">Start</span>
+                        <span class="as-meta-value">{{ card.assignment.startDate ? (card.assignment.startDate | date:'MMM d, yyyy') : '—' }}</span>
+                      </div>
+                      <div class="as-meta-item">
+                        <mat-icon class="as-meta-icon">event</mat-icon>
+                        <span class="as-meta-label">Due</span>
+                        <span class="as-meta-value" [class.as-meta-value--danger]="card.status === 'expired'">{{ card.assignment.endDate ? (card.assignment.endDate | date:'MMM d, yyyy') : '—' }}</span>
+                      </div>
+                      <div class="as-meta-item">
+                        <mat-icon class="as-meta-icon">grade</mat-icon>
+                        <span class="as-meta-label">Max</span>
+                        <span class="as-meta-value">{{ card.assignment.maxMarks ?? '—' }}</span>
+                      </div>
+                      <div class="as-meta-item">
+                        <mat-icon class="as-meta-icon">description</mat-icon>
+                        <span class="as-meta-label">Type</span>
+                        <span class="as-meta-value">{{ card.fileTypeLabel }}</span>
+                      </div>
+                    </div>
+
+                    @if (card.submission) {
+                      <div class="as-submission">
+                        <div class="as-sub-row">
+                          <mat-icon class="as-sub-icon">check_circle</mat-icon>
+                          <span class="as-sub-label">Status</span>
+                          <span class="as-sub-value">{{ card.status === 'reviewed' ? 'Graded' : (card.submission.status || 'Submitted') }}</span>
+                        </div>
+                        @if (card.submission.fileName || card.submission.filePath) {
+                          <div class="as-file-preview-card">
+                            <div class="as-file-main" (click)="downloadSubmissionFile(card)" title="Download submission file">
+                              <mat-icon class="as-file-icon">description</mat-icon>
+                              <div class="as-file-info-text">
+                                <span class="as-file-name">{{ card.submission.fileName || 'Uploaded Submission' }}</span>
+                                <span class="as-file-size">{{ card.submission.fileSize ? (card.submission.fileSize / 1024).toFixed(1) + ' KB' : 'Read-only Submission' }}</span>
+                              </div>
+                            </div>
+                            <div class="as-file-actions">
+                              <button type="button" class="as-file-action-btn" (click)="previewSubmissionFile(card)" title="Preview Document">
+                                <mat-icon>visibility</mat-icon>
+                                <span>Preview</span>
+                              </button>
+                              <button type="button" class="as-file-action-btn as-file-action-btn--primary" (click)="downloadSubmissionFile(card)" title="Download File">
+                                <mat-icon>download</mat-icon>
+                                <span>Download</span>
+                              </button>
+                            </div>
+                          </div>
+                        }
+                        @if (card.submission.marks != null) {
+                          <div class="as-sub-row as-sub-row--score">
+                            <mat-icon class="as-sub-icon">military_tech</mat-icon>
+                            <span class="as-sub-label">Score</span>
+                            <span class="as-sub-value as-sub-value--score">{{ card.submission.marks }} / {{ card.assignment.maxMarks || 100 }}</span>
+                          </div>
+                        }
+                        @if (card.submission.reviewerComment) {
+                          <div class="as-sub-comment">
+                            <mat-icon class="as-sub-icon">chat</mat-icon>
+                            <div>
+                              <span class="as-sub-label">Reviewer Comment</span>
+                              <p class="as-comment-text">{{ card.submission.reviewerComment }}</p>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+
+                    @if (card.canSubmit && card.status !== 'submitted' && card.status !== 'reviewed') {
+                      <div class="as-upload">
+                        <div class="as-upload-area" (click)="triggerFileUpload(key)">
+                          <mat-icon class="as-upload-icon">cloud_upload</mat-icon>
+                          <span class="as-upload-text">
+                            @if (getSelectedFile(key); as file) {
+                              {{ file.name }}
+                            } @else {
+                              Drag & drop or click to browse
+                            }
+                          </span>
+                        </div>
+                        @if (state.error) {
+                          <div class="as-notification as-notification--error">
+                            <mat-icon>error</mat-icon>
+                            <span>{{ state.error }}</span>
+                          </div>
+                        }
+                        @if (state.success) {
+                          <div class="as-notification as-notification--success">
+                            <mat-icon>check_circle</mat-icon>
+                            <span>{{ state.success }}</span>
+                          </div>
+                        }
+                        <button pButton pRipple class="p-button-sm as-submit-btn"
+                          [disabled]="!getSelectedFile(key) || state.submitting"
+                          (click)="submitAssignment(card)"
+                          [label]="state.submitting ? 'Submitting...' : 'Submit Assignment'"
+                          icon="pi pi-upload">
+                        </button>
+                      </div>
+                    }
+
+                    @let remaining = daysUntil(card);
+                    @if (card.status === 'active') {
+                      @let pct = timeProgress(card);
+                      <div class="as-availability">
+                        <div class="as-avail-row">
+                          <span class="as-avail-label">
+                            @if (remaining !== null && remaining <= 3) {
+                              <mat-icon class="as-avail-icon as-avail-icon--urgent">timer</mat-icon>
+                              {{ daysLabel(remaining) }}
+                            } @else {
+                              <mat-icon class="as-avail-icon">schedule</mat-icon>
+                              Time remaining
+                            }
+                          </span>
+                          <span class="as-avail-pct">{{ pct }}% elapsed</span>
+                        </div>
+                        <div class="as-avail-track">
+                          <div class="as-avail-fill" [style.width.%]="pct" [class.as-avail-fill--warn]="pct >= 75"></div>
+                        </div>
+                      </div>
+                    }
+                    @if (card.status === 'upcoming') {
+                      <div class="as-status-msg as-status-msg--upcoming">
+                        <mat-icon>schedule</mat-icon>
+                        <span>
+                          @if (remaining !== null && remaining > 0) {
+                            Opens in {{ remaining }} day{{ remaining === 1 ? '' : 's' }}
+                          } @else {
+                            Opens today
+                          }
+                          &mdash; {{ card.assignment.startDate | date:'MMM d, yyyy' }}
+                        </span>
+                      </div>
+                    }
+                    @if (card.status === 'expired' && !card.submission) {
+                      <div class="as-status-msg as-status-msg--expired">
+                        <mat-icon>block</mat-icon>
+                        <span>Submission closed on {{ card.assignment.endDate | date:'MMM d, yyyy' }}</span>
+                      </div>
+                    }
+
+                    <div class="as-card-actions">
+                      <a pButton pRipple class="p-button-outlined p-button-sm" [routerLink]="getAssignmentLink(card)">
+                        <mat-icon>visibility</mat-icon>
+                        <span>Details</span>
+                      </a>
+                      <a pButton pRipple class="p-button-outlined p-button-sm" [routerLink]="getWeekLink(card)">
+                        <mat-icon>folder</mat-icon>
+                        <span>Week</span>
+                      </a>
+                      <a pButton pRipple class="p-button-outlined p-button-sm" routerLink="/employee/progress-timeline">
+                        <mat-icon>timeline</mat-icon>
+                        <span>Timeline</span>
+                      </a>
+                    </div>
+                  </div>
+                </ng-template>
+              </p-card>
+            }
+          </div>
+        }
+      }
+    }
+  }
+</div>
+
+<app-video-player-modal #videoPlayer></app-video-player-modal>

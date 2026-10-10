@@ -1,0 +1,75 @@
+<app-back-nav fallbackRoute="/" />
+
+<div class="np-page">
+  <div class="np-header">
+    <div class="np-header-left">
+      <h1 class="np-title">Notifications</h1>
+      @if (service.unreadCount(); as count) {
+        <span class="np-badge">{{ count }} new</span>
+      }
+    </div>
+    <div class="np-header-right">
+      @if (service.notifications().length > 0) {
+        <button class="np-btn np-btn--text" (click)="markAllRead()">
+          <mat-icon>done_all</mat-icon> Mark all read
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (service.loading() && service.notifications().length === 0) {
+    <div class="np-body">
+      @for (_ of [1,2,3,4,5]; track _) {
+        <div class="np-skeleton">
+          <div class="np-skeleton-icon"></div>
+          <div class="np-skeleton-lines">
+            <div class="np-skeleton-line np-skeleton-line--short"></div>
+            <div class="np-skeleton-line np-skeleton-line--long"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (service.error() && service.notifications().length === 0) {
+    <div class="np-body np-body--error">
+      <mat-icon class="np-error-icon">error_outline</mat-icon>
+      <p>{{ service.error() }}</p>
+      <button class="np-btn np-btn--primary" (click)="service.loadNotifications()">Retry</button>
+    </div>
+  } @else if (service.notifications().length === 0) {
+    <div class="np-body np-body--empty">
+      <app-empty-state
+        icon="notifications_off"
+        title="No notifications yet"
+        hint="You're all caught up! New notifications will appear here."
+      />
+    </div>
+  } @else {
+    <div class="np-list">
+      @for (n of service.notifications(); track trackById($index, n)) {
+        @let nType = notificationType(n.title, n.message);
+        <div class="np-card"
+          [class.np-card--unread]="!n.isRead"
+          (click)="onClick(n)">
+          <div class="np-card-icon" [style.background]="typeColor(nType) + '18'" [style.color]="typeColor(nType)">
+            <mat-icon>{{ typeIcon(nType) }}</mat-icon>
+          </div>
+          <div class="np-card-body">
+            <div class="np-card-title">{{ n.title }}</div>
+            <div class="np-card-msg">{{ n.message }}</div>
+            <div class="np-card-time">{{ relativeTime(n.createdAt) }}</div>
+          </div>
+          <div class="np-card-actions" (click)="$event.stopPropagation()">
+            @if (!n.isRead) {
+              <button class="np-action-btn np-action-btn--read" (click)="markRead(n)" title="Mark as read">
+                <mat-icon>check_circle_outline</mat-icon>
+              </button>
+            }
+            <button class="np-action-btn np-action-btn--delete" (click)="delete(n)" title="Delete notification">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

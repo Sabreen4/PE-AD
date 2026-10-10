@@ -1,0 +1,80 @@
+@if (service.drawerOpen()) {
+  <div class="nd-backdrop" (click)="service.closeDrawer()"></div>
+
+  <aside class="nd-drawer" [class.nd-drawer--open]="service.drawerOpen()">
+    <div class="nd-header">
+      <div class="nd-header-left">
+        <h2 class="nd-title">Notifications</h2>
+        @if (service.unreadCount(); as count) {
+          <span class="nd-badge">{{ count }} new</span>
+        }
+      </div>
+      <div class="nd-header-right">
+        @if (service.notifications().length > 0) {
+          <button class="nd-btn nd-btn--text" (click)="service.markAllAsRead()">
+            <mat-icon>done_all</mat-icon> Mark all read
+          </button>
+        }
+        <button class="nd-btn nd-btn--icon" (click)="service.closeDrawer()" title="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    @if (service.loading() && service.notifications().length === 0) {
+      <div class="nd-body nd-body--loading">
+        @for (_ of [1,2,3,4,5]; track _) {
+          <div class="nd-skeleton">
+            <div class="nd-skeleton-icon"></div>
+            <div class="nd-skeleton-lines">
+              <div class="nd-skeleton-line nd-skeleton-line--short"></div>
+              <div class="nd-skeleton-line nd-skeleton-line--long"></div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (service.error() && service.notifications().length === 0) {
+      <div class="nd-body nd-body--error">
+        <mat-icon class="nd-error-icon">error_outline</mat-icon>
+        <p>{{ service.error() }}</p>
+        <button class="nd-btn nd-btn--primary" (click)="service.loadNotifications()">Retry</button>
+      </div>
+    } @else if (service.notifications().length === 0) {
+      <div class="nd-body">
+        <app-empty-state
+          icon="notifications_off"
+          title="No notifications yet"
+          hint="You're all caught up! New notifications will appear here."
+        />
+      </div>
+    } @else {
+      <div class="nd-body">
+        @for (n of service.notifications(); track trackById($index, n)) {
+          @let nType = notificationType('', n.title, n.message);
+          <div class="nd-card"
+            [class.nd-card--unread]="!n.isRead"
+            (click)="onClick(n)">
+            <div class="nd-card-icon" [style.background]="typeColor(nType) + '18'" [style.color]="typeColor(nType)">
+              <mat-icon>{{ typeIcon(nType) }}</mat-icon>
+            </div>
+            <div class="nd-card-body">
+              <div class="nd-card-title">{{ n.title }}</div>
+              <div class="nd-card-msg">{{ n.message }}</div>
+              <div class="nd-card-time">{{ relativeTime(n.createdAt) }}</div>
+            </div>
+            <div class="nd-card-actions" (click)="$event.stopPropagation()">
+              @if (!n.isRead) {
+                <button class="nd-action-btn nd-action-btn--read" (click)="service.markAsRead(n.id)" title="Mark as read">
+                  <mat-icon>check_circle_outline</mat-icon>
+                </button>
+              }
+              <button class="nd-action-btn nd-action-btn--delete" (click)="delete(n)" title="Delete notification">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </aside>
+}

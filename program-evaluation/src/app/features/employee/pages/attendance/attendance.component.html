@@ -1,0 +1,155 @@
+<div class="at-page">
+  <app-back-nav fallbackRoute="/employee" />
+  <div class="at-header-card">
+    <div class="at-header-main">
+      <div class="at-header-info">
+        <h1 class="at-title">
+          <span class="material-symbols-outlined at-title-icon">fact_check</span>
+          Attendance
+        </h1>
+        <p class="at-subtitle">View your attendance records across programs</p>
+      </div>
+
+      @if (!isLoading() && programs().length > 0) {
+        <div class="at-program-filter">
+          <label class="at-filter-label">Program Track</label>
+          <p-dropdown
+            [options]="programs()"
+            optionLabel="name"
+            optionValue="id"
+            [ngModel]="selectedProgramId()"
+            (ngModelChange)="onProgramChange($event)"
+            placeholder="Choose a program..."
+            styleClass="as-dropdown-control">
+          </p-dropdown>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (isLoading() && allRecords().length === 0 && !isForbidden()) {
+    <div class="at-loading">
+      @for (_ of [1,2,3]; track $index) { <div class="at-skeleton"></div> }
+    </div>
+  } @else {
+
+    @if (errorMessage() && !isForbidden()) {
+      <div class="at-notification">{{ errorMessage() }}</div>
+    }
+
+    @if (isForbidden()) {
+      <div class="at-error-banner">
+        <span class="material-symbols-outlined">lock</span>
+        <div>
+          <h3>Access Denied</h3>
+          <p>{{ errorMessage() }}</p>
+          <p class="at-error-hint">The attendance endpoint may require backend updates to allow employee self-access. Please ask your administrator to check the authorization on <code>GET /enrollment/&#123;id&#125;/attendance</code>.</p>
+        </div>
+      </div>
+    }
+
+    @if (selectedProgramId() && enrollment() && !isForbidden()) {
+      <div class="at-stats">
+        <div class="at-stat at-stat--primary">
+          <div class="at-stat-header">
+            <span class="material-symbols-outlined">trending_up</span>
+            <span>Attendance Rate</span>
+          </div>
+          <p class="at-stat-value">{{ attendancePercentage() !== null ? attendancePercentage() + '%' : '—' }}</p>
+          <p class="at-stat-sub">{{ presentCount() }} present out of {{ totalRecords() }} marked</p>
+        </div>
+        <div class="at-stat at-stat--success">
+          <div class="at-stat-header">
+            <span class="material-symbols-outlined">check_circle</span>
+            <span>Present</span>
+          </div>
+          <p class="at-stat-value">{{ presentCount() }}</p>
+          <p class="at-stat-sub">Days attended</p>
+        </div>
+        <div class="at-stat at-stat--danger">
+          <div class="at-stat-header">
+            <span class="material-symbols-outlined">cancel</span>
+            <span>Absent</span>
+          </div>
+          <p class="at-stat-value">{{ absentCount() }}</p>
+          <p class="at-stat-sub">Days missed</p>
+        </div>
+        <div class="at-stat">
+          <div class="at-stat-header">
+            <span class="material-symbols-outlined">list_alt</span>
+            <span>Total Records</span>
+          </div>
+          <p class="at-stat-value">{{ totalRecords() }}</p>
+          <p class="at-stat-sub">All entries</p>
+        </div>
+      </div>
+
+      <div class="search-wrapper">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          #empAttSearchInput
+          type="text"
+          class="search-input"
+          placeholder="Search by week or date..."
+          (input)="onSearchInput($event)" />
+        @if (searchQuery()) {
+          <button class="search-clear" (click)="clearSearch(empAttSearchInput)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        }
+      </div>
+
+      @if (filteredRecords().length > 0) {
+        <div class="at-table-wrap">
+          <table class="at-table">
+            <thead>
+              <tr>
+                <th>Week</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (rec of paginatedRecords(); track $index) {
+                <tr>
+                  <td><span class="at-week-badge">Week {{ rec.weekLabel.replace('Week ', '') }}</span></td>
+                  <td class="at-cell-date">{{ rec.date }}</td>
+                  <td>
+                    @if (rec.status === 'Present') {
+                      <span class="at-status at-status--present">Present</span>
+                    } @else if (rec.status === 'Absent') {
+                      <span class="at-status at-status--absent">Absent</span>
+                    } @else {
+                      <span class="at-status at-status--na">Not marked</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <app-pagination
+          [currentPage]="currentPage()"
+          [totalRecords]="totalRecords()"
+          [pageSize]="pageSize()"
+          (pageChange)="goToPage($event)"
+          (pageSizeChange)="onPageSizeChange($event)" />
+      } @else if (!isLoading()) {
+        <div class="at-empty">
+          <span class="material-symbols-outlined">event_busy</span>
+          @if (searchQuery()) {
+            <h3>No matching records</h3>
+            <p>Try adjusting your search to see more results.</p>
+          } @else {
+            <h3>No attendance records</h3>
+            <p>No attendance has been marked for you yet in this program.</p>
+          }
+        </div>
+      }
+    }
+  }
+</div>

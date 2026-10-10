@@ -1,0 +1,124 @@
+<div class="create-page">
+  <app-back-nav fallbackRoute="/evaluator/programs"/>
+  <div class="page-header-row">
+    <div>
+      <p class="page-eyebrow">Program Management</p>
+      <h1 class="page-title">Create Program</h1>
+    </div>
+    <a routerLink="/evaluator/programs" class="btn-secondary">
+      &larr; Back to Programs
+    </a>
+  </div>
+
+  <div class="two-col">
+    <div class="main-col">
+      <div class="page-card">
+        <div class="card-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          <span>Program Details</span>
+        </div>
+
+        <form [formGroup]="programForm" (ngSubmit)="onSubmit()" class="card-form">
+          <div class="form-group">
+            <label for="name" class="form-label">Program name <span class="required">*</span></label>
+            <input id="name" type="text" formControlName="name" class="form-input"
+              placeholder="Enter program name"
+              [class.input-error]="f['name'].invalid && (f['name'].dirty || f['name'].touched)" />
+            @if (f['name'].invalid && (f['name'].dirty || f['name'].touched)) {
+              <div class="validation-error">Program name is required.</div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="description" class="form-label">Description</label>
+            <textarea id="description" formControlName="description" class="form-input form-textarea"
+              placeholder="Enter program description" rows="3"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="durationWeeks" class="form-label">Duration (weeks) <span class="required">*</span></label>
+            <input id="durationWeeks" type="number" formControlName="durationWeeks" class="form-input"
+              min="1" max="52"
+              [class.input-error]="f['durationWeeks'].invalid && (f['durationWeeks'].dirty || f['durationWeeks'].touched)" />
+            @if (f['durationWeeks'].invalid && (f['durationWeeks'].dirty || f['durationWeeks'].touched)) {
+              <div class="validation-error">Duration must be at least 1 week.</div>
+            }
+          </div>
+
+          <div class="form-divider"></div>
+
+          <div class="selected-count" *ngIf="selectedEmployeeIds().size > 0">
+            {{ selectedEmployeeIds().size }} employee{{ selectedEmployeeIds().size > 1 ? 's' : '' }} selected for enrollment
+          </div>
+
+          <button type="submit" class="btn-primary btn-full" [disabled]="programForm.invalid || isSubmitting()">
+            @if (isSubmitting()) {
+              <span class="btn-loading">
+                <span class="spinner spinner--white"></span>
+                Creating program...
+              </span>
+            } @else {
+              Create Program
+            }
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="side-col">
+      <div class="page-card">
+        <div class="card-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Enroll Employees</span>
+        </div>
+
+        <div class="employee-search">
+          <svg class="search-icon-sm" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            class="employee-search-input"
+            placeholder="Search employees..."
+            [ngModel]="employeeSearchQuery()"
+            (appDebouncedSearch)="employeeSearchQuery.set($event)" />
+        </div>
+
+        <div class="employee-actions" *ngIf="filteredEmployees.length > 0">
+          <button class="btn-text" (click)="selectAll()">Select all</button>
+          <button class="btn-text" (click)="deselectAll()">Deselect all</button>
+        </div>
+
+        @if (isLoadingEmployees()) {
+          <div class="employee-loading">
+            <div class="spinner"></div>
+            <span>Loading employees...</span>
+          </div>
+        } @else if (filteredEmployees.length === 0) {
+          <div class="employee-empty">
+            <p *ngIf="employeeSearchQuery()">No employees match your search.</p>
+            <p *ngIf="!employeeSearchQuery()">No employees available.</p>
+          </div>
+        } @else {
+          <div class="employee-list">
+            @for (emp of filteredEmployees; track emp.id) {
+              <div class="employee-row" (click)="toggleEmployee(emp.id)">
+                <input type="checkbox" class="employee-checkbox"
+                  [checked]="selectedEmployeeIds().has(emp.id)"
+                  (click)="$event.stopPropagation(); toggleEmployee(emp.id)" />
+                <div class="employee-info">
+                  <span class="employee-name">{{ emp.firstName }} {{ emp.lastName }}</span>
+                   <span class="employee-meta">{{ emp.email }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

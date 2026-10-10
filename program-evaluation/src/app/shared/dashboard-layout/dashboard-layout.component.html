@@ -1,0 +1,25 @@
+<div class="layout" [class.layout--collapsed]="collapsed()">
+  <app-sidebar
+    [navItems]="navItems()"
+    [brand]="brand()"
+    [collapsed]="collapsed()"
+    [mobileOpen]="mobileNavOpen()"
+    (collapsedChange)="toggleCollapsed()"
+    (mobileClose)="closeMobileNav()"
+    (settingsClick)="toggleSettings()"
+  />
+
+  <div class="layout__main">
+    <app-navbar (toggleMobileNav)="toggleMobileNav()" />
+
+    <main class="layout__content">
+      <router-outlet />
+    </main>
+  </div>
+</div>
+
+<app-toast />
+<app-notification-drawer />
+@if (settingsOpen()) {
+  <app-settings-panel (closePanel)="closeSettings()" />
+}

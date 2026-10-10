@@ -1,0 +1,24 @@
+
+    <div class="page">
+      <app-back-nav fallbackRoute="/program" />
+      <div class="page-header">
+        <h2>Weeks</h2>
+        <button mat-flat-button color="primary" (click)="openCreate()">
+          <mat-icon>add</mat-icon>
+          Add week
+        </button>
+      </div>
+
+      <div class="card">
+        <app-entity-table
+          [columns]="columns"
+          [data]="weeks()"
+          [loading]="loading()"
+          emptyTitle="No weeks yet"
+          emptyHint="Add weeks to structure this program."
+          (edit)="openEdit($event)"
+          (delete)="remove($event)">
+        </app-entity-table>
+      </div>
+    </div>
+  

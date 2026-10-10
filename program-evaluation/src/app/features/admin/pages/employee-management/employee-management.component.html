@@ -1,0 +1,111 @@
+<div class="page-page">
+  <app-back-nav fallbackRoute="/admin" />
+  <div class="page-header-row">
+    <div>
+      <p class="page-eyebrow">Organization Members</p>
+      <h1 class="page-title">Employees</h1>
+      <p class="page-subtitle" *ngIf="!isLoading()">
+        {{ totalRecords() }} {{ totalRecords() === 1 ? 'employee' : 'employees' }} registered
+      </p>
+    </div>
+    <a routerLink="/register/employees/register" class="btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Employee
+    </a>
+  </div>
+
+  <div class="page-toolbar">
+    <div class="search-wrapper">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        #empSearchInput
+        type="text"
+        class="search-input"
+        placeholder="Search by name, email..."
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)" />
+      @if (searchQuery()) {
+        <button class="search-clear" (click)="clearSearch(empSearchInput)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      }
+    </div>
+    <div class="filter-group">
+      <select
+        class="filter-select"
+        [ngModel]="statusFilter()"
+        (ngModelChange)="onStatusFilter($event)">
+        <option value="all">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="page-card">
+    @if (isLoading()) {
+      <div class="state-box">
+        <div class="spinner"></div>
+        <span>Loading employees...</span>
+      </div>
+    } @else if (errorMessage() !== null) {
+      <div class="state-box state-error">
+        {{ errorMessage() }}
+      </div>
+    } @else if (employees().length === 0) {
+      <div class="state-box state-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <h3>No employees yet</h3>
+        <p *ngIf="searchQuery() || statusFilter() !== 'all'">Try adjusting your search or filters.</p>
+        <p *ngIf="!searchQuery() && statusFilter() === 'all'">Register your first employee to get started.</p>
+      </div>
+    } @else {
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="col-name">Name</th>
+              <th class="col-email">Email</th>
+              <th class="col-status">Status</th>
+              <th class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (emp of employees(); track emp.id) {
+              <tr class="data-row" (click)="viewDetails(emp)">
+                <td class="col-name">{{ emp.firstName }} {{ emp.lastName }}</td>
+                <td class="col-email">{{ emp.email }}</td>
+                <td class="col-status">
+                  <span class="stamp" [class.stamp--success]="emp.isActive" [class.stamp--danger]="!emp.isActive">
+                    {{ emp.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td class="col-actions" (click)="$event.stopPropagation()">
+                  <app-action-menu
+                    [items]="actionItems"
+                    (action)="handleAction($event, emp)" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <app-pagination
+        [currentPage]="currentPage()"
+        [totalRecords]="totalRecords()"
+        [pageSize]="pageSize()"
+        [isLoading]="isLoading()"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="onPageSizeChange($event)" />
+    }
+  </div>
+</div>

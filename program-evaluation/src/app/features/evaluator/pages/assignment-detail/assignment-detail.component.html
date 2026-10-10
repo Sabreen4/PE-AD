@@ -1,0 +1,177 @@
+<div class="ad-page">
+  <div class="ad-header">
+    <button class="btn-ghost" (click)="goBack()">
+      <span class="material-icons ghost-icon">arrow_back</span>
+      Back to Week
+    </button>
+    <div class="ad-header-row">
+      <div>
+        <p class="ad-eyebrow">Assignment Evaluation</p>
+        <h1 class="ad-title">{{ assignment()?.title || 'Assignment' }}</h1>
+      </div>
+      <a [routerLink]="['/evaluator/programs', programId, 'weeks', weekId, 'assignments', assignmentId, 'edit']" class="btn-secondary-sm">
+        <span class="material-icons btn-icon">edit</span>
+        Edit Assignment
+      </a>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="state-box"><div class="spinner"></div><span>Loading assignment...</span></div>
+  } @else if (errorMessage()) {
+    <div class="state-box state-error">
+      <span class="material-icons">error_outline</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  } @else {
+    @let a = assignment();
+    @if (a) {
+      <div class="ad-grid">
+        <div class="ad-main">
+
+          <!-- Quick stats -->
+          <div class="stats-row">
+            <div class="stat-card">
+              <p class="stat-label">Total Submissions</p>
+              <div class="stat-value">{{ submissions().length }}</div>
+            </div>
+            <div class="stat-card">
+              <p class="stat-label">Pending Review</p>
+              <div class="stat-value stat-value--warn">{{ pendingReviewCount() }}</div>
+            </div>
+            <div class="stat-card stat-card--status">
+              <p class="stat-label">Assignment Status</p>
+              <span class="stamp" [class.stamp--warning]="isBeforeStart()" [class.stamp--success]="isActive()" [class.stamp--danger]="isAfterEnd()">
+                @if (isBeforeStart()) { Upcoming } @else if (isAfterEnd()) { Closed } @else { Active }
+              </span>
+            </div>
+          </div>
+
+          <!-- Assignment details -->
+          <div class="card">
+            <div class="card-header">
+              <span class="material-icons header-icon">description</span>
+              Assignment Details
+            </div>
+            <div class="card-body">
+              <div class="detail-grid">
+                <div class="detail-item detail-item--wide">
+                  <span class="info-label">Description</span>
+                  <span class="info-value info-value--text">{{ a.description || '—' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="info-label">Start Date</span>
+                  <span class="info-value">{{ a.startDate ? (a.startDate | date:'medium') : '—' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="info-label">Due Date</span>
+                  <span class="info-value">{{ a.endDate ? (a.endDate | date:'medium') : '—' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="info-label">Max Marks</span>
+                  <span class="info-value">{{ a.maxMarks ?? '—' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="info-label">Allowed File Type</span>
+                  <span class="info-value">
+                    @if (a.fileType) {
+                      <span class="file-type-badge">.{{ a.fileType.toLowerCase() }}</span>
+                    } @else {
+                      <span>Any</span>
+                    }
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submissions -->
+          <div class="card card--table">
+            <div class="card-header">
+              <span class="material-icons header-icon">groups</span>
+              Employee Submissions
+              <span class="count-chip">{{ submissions().length }}</span>
+            </div>
+            <div class="card-body card-body--flush">
+              @if (submissions().length === 0) {
+                <div class="empty-state">
+                  <span class="material-icons empty-icon">inbox</span>
+                  <p>No submissions yet.</p>
+                </div>
+              } @else {
+                <div class="submissions-table-wrap">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Employee</th>
+                        <th>Status</th>
+                        <th>File</th>
+                        <th>Marks</th>
+                        <th>Comment</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (s of submissions(); track s.id) {
+                        <tr>
+                          <td>
+                            <div class="employee-cell">
+                              <span class="avatar"><span class="material-icons">person</span></span>
+                              <span class="employee-name">Employee #{{ s.enrollmentId }}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <span class="stamp" [class.stamp--success]="s.status === 'submitted' || s.status === 'evaluated'" [class.stamp--neutral]="s.status === 'pending'">
+                              {{ s.status || 'pending' }}
+                            </span>
+                          </td>
+                          <td>
+                            @if (s.fileName) {
+                              <span class="file-chip">
+                                <span class="material-icons file-chip-icon">description</span>
+                                {{ s.fileName }}
+                              </span>
+                            } @else {
+                              <span class="no-file">No file</span>
+                            }
+                          </td>
+                          <td>
+                            @if (s.marks != null) {
+                              <span class="marks-display">{{ s.marks }}<span class="marks-max">/{{ a.maxMarks }}</span></span>
+                            } @else {
+                              <input type="number" class="score-input" min="0" [max]="a.maxMarks ?? 100" placeholder="—" (input)="updateMarks('' + s.id, $any($event.target).value)" />
+                            }
+                          </td>
+                          <td>
+                            @if (getComment(s)) {
+                              <span class="comment-text">{{ getComment(s) }}</span>
+                            } @else {
+                              <input type="text" class="comment-input" placeholder="Add feedback..." (input)="updateComment('' + s.id, $any($event.target).value)" />
+                            }
+                          </td>
+                          <td>
+                            @if (s.marks == null) {
+                              <button class="btn-sm btn-primary-sm" (click)="evaluate(s)" [disabled]="isEvaluating()">
+                                @if (isEvaluating()) { <div class="spinner-sm"></div> }
+                                @else { <span class="material-icons btn-icon">check</span><span>Evaluate</span> }
+                              </button>
+                            } @else {
+                              <span class="evaluated-badge">
+                                <span class="material-icons badge-icon">done_all</span>
+                                Evaluated
+                              </span>
+                            }
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

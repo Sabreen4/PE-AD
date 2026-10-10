@@ -1,0 +1,54 @@
+<div class="emp-page">
+  <div class="emp-header">
+    <p class="emp-eyebrow">Program Weeks</p>
+    <h1 class="emp-title">Weekly Schedule</h1>
+    <p class="emp-subtitle">View your program timeline and weekly activities</p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="state-box"><div class="spinner"></div><span>Loading programs...</span></div>
+  } @else {
+    <div class="select-row">
+      <label class="select-label">Select Program</label>
+      <select class="form-select" [ngModel]="selectedProgramId()" (ngModelChange)="onProgramChange($event)">
+        <option value="">Choose a program...</option>
+        @for (p of programs(); track p.id) {
+          <option [value]="p.id">{{ p.name }}</option>
+        }
+      </select>
+    </div>
+
+    @if (isLoadingWeeks()) {
+      <div class="state-box"><div class="spinner"></div><span>Loading weeks...</span></div>
+    } @else if (errorMessage()) {
+      <div class="state-box state-error">{{ errorMessage() }}</div>
+    } @else if (selectedProgramId() && weeks().length === 0) {
+      <div class="state-box state-empty">
+        <h3>No weeks found</h3>
+        <p>This program does not have any weeks configured yet.</p>
+      </div>
+    } @else if (weeks().length > 0) {
+      <div class="weeks-timeline">
+        @for (w of weeks(); track w.id) {
+          <div class="week-item" [class.current]="isCurrentWeek(w)" [class.completed]="isCompletedWeek(w)" [class.upcoming]="isUpcomingWeek(w)">
+            <div class="week-indicator">
+              <div class="week-dot"></div>
+              @if (!$last) { <div class="week-line"></div> }
+            </div>
+            <div class="week-card">
+              <div class="week-badge">{{ isCurrentWeek(w) ? 'Current' : isCompletedWeek(w) ? 'Completed' : 'Upcoming' }}</div>
+              <h3 class="week-title">Week {{ w.weekNumber }}</h3>
+              @if (w.topic) { <p class="week-topic">{{ w.topic }}</p> }
+              @if (w.description) { <p class="week-desc">{{ w.description }}</p> }
+              <div class="week-dates">
+                <span>{{ w.startDate | date:'MMM d' }}</span>
+                <span>—</span>
+                <span>{{ w.endDate | date:'MMM d, y' }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,184 @@
+<div class="wd-page">
+  <app-back-nav fallbackRoute="/employee/programs" />
+  @if (isLoading()) {
+    <div class="wd-loading"><div class="spinner"></div><span>Loading...</span></div>
+  } @else if (isForbidden()) {
+    <div class="wd-error-banner wd-error-banner--forbidden">
+      <span class="material-symbols-outlined">lock</span>
+      <div>
+        <h3>Access Denied</h3>
+        <p>{{ errorMessage() }} Please contact your evaluator if you believe this is a mistake.</p>
+      </div>
+    </div>
+  } @else if (errorMessage() && !week()) {
+    <div class="wd-error-banner">
+      <span class="material-symbols-outlined">error_outline</span>
+      <p>{{ errorMessage() }}</p>
+    </div>
+  } @else {
+    <!-- Breadcrumbs & Header -->
+    <div class="wd-header">
+      <nav class="wd-breadcrumbs">
+        <a routerLink="/employee/programs" class="wd-bc-link">Programs</a>
+        <span class="material-symbols-outlined">chevron_right</span>
+        <a [routerLink]="['/employee/programs', programId]" class="wd-bc-link">{{ program()?.name || 'Program' }}</a>
+        <span class="material-symbols-outlined">chevron_right</span>
+        <span class="wd-bc-current">Week {{ week()?.weekNumber }}</span>
+      </nav>
+      <div class="wd-title-row">
+        <div>
+          <h1 class="wd-title">Week {{ week()?.weekNumber }}: {{ week()?.topic || 'Untitled' }}</h1>
+          <p class="wd-subtitle">{{ week()?.description || 'No description available.' }}</p>
+        </div>
+        <button class="wd-back-btn" (click)="goBack()">
+          <span class="material-symbols-outlined">arrow_back</span>
+          Back
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="wd-grid">
+      <div class="wd-main">
+        <!-- Video Player -->
+        <div class="wd-card">
+          <div class="wd-card-header">
+            <span class="material-symbols-outlined wd-card-icon">play_circle</span>
+            <span>Recorded Session</span>
+          </div>
+          <div class="wd-card-body wd-card-body--no-pad">
+            @if (videoLoading()) {
+              <div class="wd-video-placeholder">
+                <div class="spinner"></div>
+                <span>Loading video...</span>
+              </div>
+            } @else if (videoUrl()) {
+              <div class="wd-video-container">
+                <video controls width="100%" class="wd-video" [src]="videoUrl()"></video>
+              </div>
+            } @else {
+              <div class="wd-video-empty">
+                <span class="material-symbols-outlined wd-video-empty-icon">videocam_off</span>
+                <h3>No Recorded Session</h3>
+                <p>No recorded session is available for this week yet.</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Assignments -->
+        <div class="wd-card">
+          <div class="wd-card-header">
+            <span class="material-symbols-outlined wd-card-icon">assignment</span>
+            <span>Assignments</span>
+            @if (assignments().length > 0) {
+              <span class="wd-card-badge">{{ assignments().length }}</span>
+            }
+          </div>
+          <div class="wd-card-body">
+            @if (assignments().length === 0) {
+              <div class="wd-empty">
+                <span class="material-symbols-outlined">assignment_add</span>
+                <p>No assignments for this week.</p>
+              </div>
+            } @else {
+              <div class="wd-assignments">
+                @for (a of assignments(); track a.id) {
+                  <div class="wd-assignment-card"
+                       [class.wd-assignment-card--active]="assignmentStatus(a) === 'active'"
+                       [class.wd-assignment-card--closed]="assignmentStatus(a) === 'closed'">
+                    <div class="wd-assign-top">
+                      <h3 class="wd-assign-title">{{ a.title || 'Assignment' }}</h3>
+                      <span class="wd-assign-badge"
+                            [class.wd-assign-badge--active]="assignmentStatus(a) === 'active'"
+                            [class.wd-assign-badge--upcoming]="assignmentStatus(a) === 'upcoming'"
+                            [class.wd-assign-badge--closed]="assignmentStatus(a) === 'closed'">
+                        @if (assignmentStatus(a) === 'upcoming') { Upcoming }
+                        @else if (assignmentStatus(a) === 'closed') { Closed }
+                        @else { Active }
+                      </span>
+                    </div>
+                    <p class="wd-assign-desc">{{ a.description || 'No description.' }}</p>
+                    <div class="wd-assign-meta">
+                      @if (a.maxMarks) {
+                        <span class="wd-assign-meta-item">
+                          <span class="material-symbols-outlined">grade</span>
+                          Max Marks: {{ a.maxMarks }}
+                        </span>
+                      }
+                      @if (a.startDate) {
+                        <span class="wd-assign-meta-item">
+                          <span class="material-symbols-outlined">calendar_today</span>
+                          Starts: {{ a.startDate | date:'MMM d, yyyy' }}
+                        </span>
+                      }
+                      @if (a.endDate) {
+                        <span class="wd-assign-meta-item">
+                          <span class="material-symbols-outlined">event</span>
+                          Due: {{ a.endDate | date:'MMM d, yyyy' }}
+                        </span>
+                      }
+                    </div>
+                    <div class="wd-assign-action">
+                      @if (assignmentStatus(a) === 'active') {
+                        <a [routerLink]="['/employee/programs', programId, 'weeks', weekId, 'assignments', a.id]"
+                           class="wd-btn wd-btn-primary">
+                          <span class="material-symbols-outlined">launch</span>
+                          View & Submit
+                        </a>
+                      } @else if (assignmentStatus(a) === 'upcoming') {
+                        <p class="wd-assign-unlock">
+                          <span class="material-symbols-outlined">lock</span>
+                          Available from {{ a.startDate | date:'MMM d, yyyy' }}
+                        </p>
+                      } @else {
+                        <p class="wd-assign-closed-text">
+                          <span class="material-symbols-outlined">block</span>
+                          Submission closed
+                        </p>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="wd-sidebar">
+        <div class="wd-card">
+          <div class="wd-card-header">
+            <span class="material-symbols-outlined wd-card-icon">info</span>
+            <span>Week Info</span>
+          </div>
+          <div class="wd-card-body">
+            <div class="wd-info-list">
+              <div class="wd-info-item">
+                <span class="wd-info-label">Week</span>
+                <span class="wd-info-value">{{ week()?.weekNumber }}</span>
+              </div>
+              <div class="wd-info-item">
+                <span class="wd-info-label">Program</span>
+                <span class="wd-info-value">{{ program()?.name }}</span>
+              </div>
+              <div class="wd-info-item">
+                <span class="wd-info-label">Topic</span>
+                <span class="wd-info-value">{{ week()?.topic || '—' }}</span>
+              </div>
+              <div class="wd-info-item">
+                <span class="wd-info-label">Assignments</span>
+                <span class="wd-info-value">{{ assignments().length }}</span>
+              </div>
+              <div class="wd-info-item">
+                <span class="wd-info-label">Video</span>
+                <span class="wd-info-value">{{ videoUrl() ? 'Available' : 'N/A' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

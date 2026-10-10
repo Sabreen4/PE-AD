@@ -1,0 +1,24 @@
+
+    <div class="page">
+      <app-back-nav fallbackRoute="/program" />
+      <div class="page-header">
+        <h2>Enrollments</h2>
+        <button mat-flat-button color="primary" (click)="openEnroll()">
+          <mat-icon>person_add</mat-icon>
+          Enroll employee
+        </button>
+      </div>
+
+      <div class="card">
+        <app-entity-table
+          [columns]="columns"
+          [data]="enrollments()"
+          [loading]="loading()"
+          [showEdit]="false"
+          emptyTitle="No enrollments yet"
+          emptyHint="Enroll employees to this program."
+          (delete)="remove($event)">
+        </app-entity-table>
+      </div>
+    </div>
+  

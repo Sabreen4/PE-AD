@@ -1,0 +1,86 @@
+<div class="reg-page">
+  <app-back-nav fallbackRoute="/auth/login" />
+  <div class="reg-header">
+    <div>
+      <p class="reg-eyebrow">{{ labels.pageEyebrow }}</p>
+      <h1 class="reg-title">{{ labels.pageTitle }}</h1>
+    </div>
+  </div>
+
+  <div class="reg-card">
+    <div class="reg-card-header">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+      </svg>
+      <span>Employee Information</span>
+    </div>
+
+    <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="reg-form">
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label for="firstName" class="form-label">{{ labels.firstNameLabel }} <span class="required">*</span></label>
+          <input id="firstName" type="text" formControlName="firstName" class="form-input"
+            placeholder="Enter first name"
+            [class.input-error]="f['firstName'].invalid && (f['firstName'].dirty || f['firstName'].touched)" />
+          <div class="validation-error" *ngIf="f['firstName'].invalid && (f['firstName'].dirty || f['firstName'].touched)">
+            <span *ngIf="f['firstName'].errors?.['required']">{{ labels.firstNameRequired }}</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="lastName" class="form-label">{{ labels.lastNameLabel }} <span class="required">*</span></label>
+          <input id="lastName" type="text" formControlName="lastName" class="form-input"
+            placeholder="Enter last name"
+            [class.input-error]="f['lastName'].invalid && (f['lastName'].dirty || f['lastName'].touched)" />
+          <div class="validation-error" *ngIf="f['lastName'].invalid && (f['lastName'].dirty || f['lastName'].touched)">
+            <span *ngIf="f['lastName'].errors?.['required']">{{ labels.lastNameRequired }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label for="email" class="form-label">{{ labels.emailLabel }} <span class="required">*</span></label>
+          <input id="email" type="email" formControlName="email" class="form-input"
+            placeholder="Enter email address"
+            [class.input-error]="f['email'].invalid && (f['email'].dirty || f['email'].touched)" />
+          <div class="validation-error" *ngIf="f['email'].invalid && (f['email'].dirty || f['email'].touched)">
+            <span *ngIf="f['email'].errors?.['required']">{{ labels.emailRequired }}</span>
+            <span *ngIf="f['email'].errors?.['email']">{{ labels.emailInvalid }}</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="phone" class="form-label">{{ labels.phoneLabel }} <span class="required">*</span></label>
+          <input id="phone" type="tel" formControlName="phone" class="form-input"
+            [placeholder]="labels.phonePlaceholder"
+            [class.input-error]="f['phone'].invalid && (f['phone'].dirty || f['phone'].touched)" />
+          <div class="validation-error" *ngIf="f['phone'].invalid && (f['phone'].dirty || f['phone'].touched)">
+            <span *ngIf="f['phone'].errors?.['required']">{{ labels.phoneRequired }}</span>
+            <span *ngIf="f['phone'].errors?.['pattern']">{{ labels.phoneInvalid }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label for="gender" class="form-label">{{ labels.genderLabel }}</label>
+          <select id="gender" formControlName="gender" class="form-input form-select">
+            <option *ngFor="let option of genderOptions" [value]="option">{{ option }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="registrationForm.invalid || isLoading()">
+          <span *ngIf="!isLoading()">{{ labels.submitText }}</span>
+          <span *ngIf="isLoading()" class="btn-loading">
+            <span class="spinner"></span>
+            {{ labels.submittingText }}
+          </span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

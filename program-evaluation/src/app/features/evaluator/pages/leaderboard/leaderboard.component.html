@@ -1,0 +1,221 @@
+<div class="lb-page">
+  <app-back-nav fallbackRoute="/evaluator"/>
+  @if (isLoading() && entries().length === 0) {
+    <div class="lb-state">
+      <div class="lb-spinner"></div>
+      <span>Loading leaderboard...</span>
+    </div>
+  } @else {
+    <div class="lb-header">
+      <div class="lb-header-left">
+        <h1 class="lb-title">Live Cumulative Leaderboard</h1>
+        <p class="lb-subtitle">Real-time performance tracking
+          @if (selectedProgramName()) {
+            for <strong>{{ selectedProgramName() }}</strong>
+          }
+        </p>
+      </div>
+      <div class="lb-header-right">
+        <div class="lb-program-select">
+          <select class="lb-select" [ngModel]="selectedProgramId()" (ngModelChange)="onProgramChange($event)">
+            <option value="">Select a Program</option>
+            @for (p of programs(); track p.id) {
+              <option [value]="p.id">{{ p.name }}</option>
+            }
+          </select>
+          <mat-icon class="lb-select-chevron">expand_more</mat-icon>
+        </div>
+        <button class="lb-btn lb-btn--outline" (click)="exportCsv()" [disabled]="entries().length === 0">
+          <mat-icon>download</mat-icon> Export CSV
+        </button>
+        <button class="lb-btn lb-btn--outline" (click)="recalculate()" [disabled]="!selectedProgramId() || isRecalculating()">
+          <mat-icon>sync</mat-icon> {{ isRecalculating() ? 'Recalculating...' : 'Recalculate' }}
+        </button>
+        <button class="lb-btn lb-btn--outline" (click)="onProgramChange(selectedProgramId())" [disabled]="!selectedProgramId()">
+          <mat-icon>refresh</mat-icon> Refresh
+        </button>
+      </div>
+    </div>
+
+    @if (selectedProgramId() && topThree().length >= 3) {
+      <div class="lb-podium">
+        <div class="lb-podium-card lb-podium-card--silver">
+          <div class="lb-podium-accent"></div>
+          @let s = topThree()[1];
+          <div class="lb-podium-avatar">
+            <div class="lb-avatar lb-avatar--silver">{{ s.initials }}</div>
+          </div>
+          <span class="lb-podium-rank">Rank #2</span>
+          <h3 class="lb-podium-name">{{ s.employeeName }}</h3>
+          <p class="lb-podium-score">{{ s.overallScore.toFixed(1) }}%</p>
+        </div>
+
+        <div class="lb-podium-card lb-podium-card--gold">
+          <div class="lb-podium-accent"></div>
+          <div class="lb-podium-crown">
+            <mat-icon>workspace_premium</mat-icon>
+          </div>
+          @let g = topThree()[0];
+          <div class="lb-podium-avatar">
+            <div class="lb-avatar lb-avatar--gold">{{ g.initials }}</div>
+          </div>
+          <span class="lb-podium-rank lb-podium-rank--gold">Rank #1</span>
+          <h3 class="lb-podium-name lb-podium-name--gold">{{ g.employeeName }}</h3>
+          <p class="lb-podium-score lb-podium-score--gold">{{ g.overallScore.toFixed(1) }}%</p>
+        </div>
+
+        <div class="lb-podium-card lb-podium-card--bronze">
+          <div class="lb-podium-accent"></div>
+          @let b = topThree()[2];
+          <div class="lb-podium-avatar">
+            <div class="lb-avatar lb-avatar--bronze">{{ b.initials }}</div>
+          </div>
+          <span class="lb-podium-rank">Rank #3</span>
+          <h3 class="lb-podium-name">{{ b.employeeName }}</h3>
+          <p class="lb-podium-score">{{ b.overallScore.toFixed(1) }}%</p>
+        </div>
+      </div>
+    } @else if (selectedProgramId() && topThree().length > 0) {
+      <div class="lb-podium lb-podium--partial">
+        @for (entry of topThree(); track entry.employeeId) {
+          <div class="lb-podium-card" [class.lb-podium-card--gold]="entry.rank === 1" [class.lb-podium-card--silver]="entry.rank === 2" [class.lb-podium-card--bronze]="entry.rank === 3">
+            <div class="lb-podium-accent"></div>
+            <div class="lb-podium-avatar">
+              <div class="lb-avatar" [class.lb-avatar--gold]="entry.rank === 1" [class.lb-avatar--silver]="entry.rank === 2" [class.lb-avatar--bronze]="entry.rank === 3">{{ entry.initials }}</div>
+            </div>
+            <span class="lb-podium-rank">Rank #{{ entry.rank }}</span>
+            <h3 class="lb-podium-name">{{ entry.employeeName }}</h3>
+            <p class="lb-podium-score">{{ entry.overallScore.toFixed(1) }}%</p>
+          </div>
+        }
+      </div>
+    }
+
+    @if (selectedProgramId() && entries().length > 0) {
+      <div class="lb-card">
+        <div class="lb-table-header">
+          <div class="lb-search-wrap">
+            <mat-icon class="lb-search-icon">search</mat-icon>
+            <input #lbSearchInput class="lb-search-input" type="text" placeholder="Search by name..." (input)="onSearchInput($event)" />
+            @if (searchQuery()) {
+              <button class="lb-search-clear" (click)="clearSearch(lbSearchInput)">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </div>
+        </div>
+        <div class="lb-table-wrap">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th class="lb-th">Rank</th>
+                <th class="lb-th lb-th--name">Name</th>
+                <th class="lb-th lb-th--num">Overall Score</th>
+                <th class="lb-th lb-th--num">Percentile</th>
+                <th class="lb-th lb-th--num">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of paginatedEntries(); track entry.employeeId) {
+                <tr class="lb-tr">
+                  <td class="lb-td lb-td--rank">
+                    <span class="lb-rank-badge" [class.lb-rank-badge--gold]="entry.rank === 1" [class.lb-rank-badge--silver]="entry.rank === 2" [class.lb-rank-badge--bronze]="entry.rank === 3">
+                      {{ entry.rank }}
+                    </span>
+                  </td>
+                  <td class="lb-td lb-td--name">
+                    <div class="lb-employee">
+                      <div class="lb-avatar-sm">{{ entry.initials }}</div>
+                      <div>
+                        <p class="lb-emp-name">{{ entry.employeeName }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="lb-td lb-td--num">
+                    <span class="lb-score-val">{{ entry.overallScore.toFixed(1) }}%</span>
+                  </td>
+                  <td class="lb-td lb-td--num">
+                    <span class="lb-percentile">{{ entry.percentile.toFixed(1) }}%</span>
+                  </td>
+                  <td class="lb-td lb-td--num">
+                    @if (entry.overallScore >= 80) {
+                      <span class="lb-flag lb-flag--positive">
+                        <mat-icon>flag</mat-icon> Positive
+                      </span>
+                    } @else if (entry.overallScore >= 60) {
+                      <span class="lb-flag lb-flag--neutral">
+                        <mat-icon>outlined_flag</mat-icon> On Track
+                      </span>
+                    } @else {
+                      <span class="lb-flag lb-flag--negative">
+                        <mat-icon>warning</mat-icon> At Risk
+                      </span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="lb-table-footer">
+          <span class="lb-footer-text">Showing {{ paginatedEntries().length }} of {{ totalRecords() }} employee(s)</span>
+        </div>
+      </div>
+
+      <app-pagination
+        [currentPage]="currentPage()"
+        [totalRecords]="totalRecords()"
+        [pageSize]="pageSize()"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="onPageSizeChange($event)" />
+
+      <div class="lb-stats">
+        <div class="lb-stat-card">
+          <p class="lb-stat-label">Average Program Score</p>
+          <div class="lb-stat-row">
+            <span class="lb-stat-value">{{ averageScore().toFixed(1) }}%</span>
+            @if (averageScore() >= 70) {
+              <span class="lb-stat-trend lb-stat-trend--up">&uarr;</span>
+            } @else {
+              <span class="lb-stat-trend lb-stat-trend--down">&darr;</span>
+            }
+          </div>
+        </div>
+        <div class="lb-stat-card">
+          <p class="lb-stat-label">Employees Tracked</p>
+          <div class="lb-stat-row">
+            <span class="lb-stat-value">{{ entries().length }}</span>
+          </div>
+        </div>
+        <div class="lb-stat-card">
+          <p class="lb-stat-label">Top Performers (&gt;80%)</p>
+          <div class="lb-stat-row">
+            <span class="lb-stat-value">{{ topPerformers().length }}/{{ entries().length }}</span>
+            <span class="lb-stat-trend lb-stat-trend--up">{{ topPerformersPercent() }}%</span>
+          </div>
+        </div>
+        <div class="lb-stat-card">
+          <p class="lb-stat-label">Flag Alerts</p>
+          <div class="lb-stat-row">
+            <span class="lb-stat-value lb-stat-value--alert">{{ flagAlerts() }}</span>
+            @if (flagAlerts() > 0) {
+              <span class="lb-stat-trend lb-stat-trend--down">Requires Action</span>
+            }
+          </div>
+        </div>
+      </div>
+    } @else if (selectedProgramId() && !isLoading()) {
+      <div class="lb-state lb-state--empty">
+        <mat-icon>leaderboard</mat-icon>
+        <h3>No leaderboard data</h3>
+        <p>Leaderboard data is not yet available for this program.</p>
+      </div>
+    } @else if (!selectedProgramId()) {
+      <div class="lb-state lb-state--select">
+        <mat-icon>leaderboard</mat-icon>
+        <h3>Select a program</h3>
+        <p>Choose a program above to view the leaderboard and rankings.</p>
+      </div>
+    }
+  }
+</div>

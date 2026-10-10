@@ -1,0 +1,276 @@
+<div class="av-page">
+  <app-back-nav fallbackRoute="/employee/programs" />
+  <div class="av-topbar">
+    <button class="av-back" (click)="goBack()"><mat-icon>arrow_back</mat-icon> Back to Week</button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="av-loading"><div class="av-spinner"></div><span>Loading assignment...</span></div>
+  } @else {
+    @let a = assignment();
+    @let sub = mySubmission();
+    @let st = status();
+    @let remaining = daysRemaining();
+    @let vidUrl = videoUrl();
+    @if (a) {
+    <div class="av-grid">
+      <div class="av-left">
+        <div class="av-card" [class.av-card--locked]="st === 'locked'" [class.av-card--expired]="st === 'expired'" [class.av-card--submitted]="st === 'submitted'">
+          <div class="av-card-head">
+            <div class="av-card-title-row">
+              <h1 class="av-card-title">{{ a.title || 'Assignment' }}</h1>
+              <span class="av-badge"
+                [class.av-badge--locked]="st === 'locked'"
+                [class.av-badge--active]="st === 'active'"
+                [class.av-badge--submitted]="st === 'submitted'"
+                [class.av-badge--expired]="st === 'expired'">
+                @if (st === 'locked') { <mat-icon>lock</mat-icon> Locked }
+                @else if (st === 'active') { <mat-icon>play_circle</mat-icon> Active }
+                @else if (st === 'submitted') {
+                  @if (sub?.status === 'evaluated') { <mat-icon>check_circle</mat-icon> Graded }
+                  @else { <mat-icon>cloud_done</mat-icon> Submitted }
+                }
+                @else { <mat-icon>timer_off</mat-icon> Expired }
+              </span>
+            </div>
+            <p class="av-card-desc">{{ a.description || 'No description available.' }}</p>
+            <div class="av-card-meta">
+              <div class="av-meta-item">
+                <mat-icon>calendar_today</mat-icon>
+                <div>
+                  <span class="av-meta-label">Start Date</span>
+                  <span class="av-meta-value">{{ a.startDate ? (a.startDate | date:'MMM d, yyyy') : '—' }}</span>
+                </div>
+              </div>
+              <div class="av-meta-item">
+                <mat-icon>event</mat-icon>
+                <div>
+                  <span class="av-meta-label">Due Date</span>
+                  <span class="av-meta-value" [class.av-meta-value--urgent]="st === 'active' && remaining !== null && remaining <= 3">
+                    {{ a.endDate ? (a.endDate | date:'MMM d, yyyy') : '—' }}
+                    @if (st === 'active' && remaining !== null) {
+                      <span class="av-meta-sub">({{ daysLabel(remaining) }})</span>
+                    }
+                  </span>
+                </div>
+              </div>
+              <div class="av-meta-item">
+                <mat-icon>grade</mat-icon>
+                <div>
+                  <span class="av-meta-label">Max Marks</span>
+                  <span class="av-meta-value">{{ a.maxMarks ?? '—' }}</span>
+                </div>
+              </div>
+              <div class="av-meta-item">
+                <mat-icon>description</mat-icon>
+                <div>
+                  <span class="av-meta-label">File Type</span>
+                  <span class="av-meta-value">{{ a.fileType ? '.' + a.fileType.toLowerCase() : 'Any' }}</span>
+                </div>
+              </div>
+            </div>
+            @if (st === 'locked') {
+              <div class="av-status-banner av-status-banner--info">
+                <mat-icon>schedule</mat-icon>
+                <span>This assignment will be available on {{ a.startDate ? (a.startDate | date:'MMMM d, yyyy') : 'the start date' }}.</span>
+              </div>
+            }
+            @if (st === 'expired') {
+              <div class="av-status-banner av-status-banner--error">
+                <mat-icon>timer_off</mat-icon>
+                <span>The submission deadline has passed ({{ a.endDate ? (a.endDate | date:'MMM d, yyyy') : '—' }}).</span>
+              </div>
+            }
+          </div>
+
+          @if (st === 'submitted' && sub) {
+            <div class="av-submission-box">
+              <div class="av-submission-header">
+                <mat-icon>assignment_turned_in</mat-icon>
+                <span>Submission Details</span>
+              </div>
+              <div class="av-submission-body">
+                <div class="av-sub-row">
+                  <span class="av-sub-label">File</span>
+                  <span class="av-sub-value">{{ sub.fileName || 'Uploaded file' }}</span>
+                </div>
+                @if (sub.fileSize) {
+                  <div class="av-sub-row">
+                    <span class="av-sub-label">Size</span>
+                    <span class="av-sub-value">{{ (sub.fileSize / 1024).toFixed(1) }} KB</span>
+                  </div>
+                }
+                <div class="av-sub-row">
+                  <span class="av-sub-label">Status</span>
+                  <span class="av-sub-badge"
+                    [class.av-sub-badge--evaluated]="sub.status === 'evaluated'"
+                    [class.av-sub-badge--submitted]="sub.status === 'submitted'">
+                    @if (sub.status === 'evaluated') { Evaluated }
+                    @else { Pending Review }
+                  </span>
+                </div>
+                @if (sub.marks != null && sub.marks != undefined) {
+                  <div class="av-sub-score">
+                    <span>Score</span>
+                    <span class="av-sub-score-value">{{ sub.marks }}/{{ a.maxMarks }}</span>
+                  </div>
+                }
+                @if (sub.reviewerComment) {
+                  <div class="av-sub-comment">
+                    <mat-icon>forum</mat-icon>
+                    <div>
+                      <span class="av-sub-comment-author">Reviewer Comment</span>
+                      <p class="av-sub-comment-text">{{ sub.reviewerComment }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="av-card av-card--video">
+          <div class="av-card-head">
+            <div class="av-card-title-row">
+              <mat-icon class="av-video-icon">videocam</mat-icon>
+              <h2 class="av-section-title">Recorded Session</h2>
+            </div>
+          </div>
+          @if (videoLoading()) {
+            <div class="av-video-loading"><div class="av-spinner"></div></div>
+          } @else if (vidUrl) {
+            <div class="av-video-player">
+              <video controls width="100%" [src]="vidUrl" poster="">
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            @if (videoMeta(); as meta) {
+              <div class="av-video-info">
+                <span class="av-video-title">{{ meta.displayTitle || 'Recorded Session' }}</span>
+                @if (meta.videoDuration) {
+                  <span class="av-video-duration"><mat-icon>schedule</mat-icon> {{ meta.videoDuration }}</span>
+                }
+              </div>
+            }
+          } @else {
+            <div class="av-video-empty">
+              <div class="av-video-empty-icon">
+                <mat-icon>videocam_off</mat-icon>
+              </div>
+              <p>No recorded session is available for this week.</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="av-right">
+        <div class="av-card av-card--upload">
+          <div class="av-card-head">
+            <div class="av-card-title-row">
+              <mat-icon>upload_file</mat-icon>
+              <h2 class="av-section-title">Upload Assignment</h2>
+            </div>
+          </div>
+          <div class="av-upload-body">
+            <div class="av-upload-current">
+              <span class="av-upload-current-label">Current Assignment</span>
+              <span class="av-upload-current-name">{{ a.title || '—' }}</span>
+            </div>
+
+            <div class="av-dropzone" (click)="triggerFileUpload()">
+              <div class="av-dropzone-icon">
+                <mat-icon>cloud_upload</mat-icon>
+              </div>
+              <p class="av-dropzone-title">Drag &amp; drop files</p>
+              <p class="av-dropzone-sub">or browse files on your computer</p>
+              @if (a.fileType) {
+                <p class="av-dropzone-type">Accepted: <strong>.{{ a.fileType.toLowerCase() }}</strong> &middot; Max 10 MB</p>
+              } @else {
+                <p class="av-dropzone-type">Max file size: <strong>10 MB</strong></p>
+              }
+            </div>
+
+            @if (selectedFile(); as file) {
+              <div class="av-file-selected"
+                [class.av-file-selected--invalid]="fileError() != null">
+                <mat-icon>insert_drive_file</mat-icon>
+                <div>
+                  <span class="av-file-name">{{ file.name }}</span>
+                  <span class="av-file-size">{{ (file.size / 1024).toFixed(1) }} KB</span>
+                  @if (fileError(); as ferr) {
+                    <span class="av-file-error">{{ ferr }}</span>
+                  }
+                </div>
+                <button class="av-file-remove" (click)="selectedFile.set(null)"><mat-icon>close</mat-icon></button>
+              </div>
+            }
+
+            @if (a.fileType) {
+              <div class="av-formats">
+                <span class="av-formats-label">Supported format</span>
+                <span class="av-format-badge">.{{ a.fileType.toLowerCase() }}</span>
+              </div>
+            }
+
+            <button class="av-submit-btn" [disabled]="!canSubmit() || isSubmitting()" (click)="submitAssignment()">
+              @if (isSubmitting()) {
+                <div class="av-spinner av-spinner--sm"></div>
+                <span>Submitting...</span>
+              } @else {
+                <mat-icon>send</mat-icon>
+                <span>Submit Assignment</span>
+              }
+            </button>
+
+            @if (!canSubmit() && st !== 'submitted') {
+              <p class="av-upload-disabled-hint">
+                @if (st === 'locked') { Submission is not available before the start date. }
+                @else if (st === 'expired') { Submission period has ended. }
+              </p>
+            }
+          </div>
+        </div>
+
+        @if (st === 'submitted' && sub) {
+          <div class="av-card">
+            <div class="av-card-head">
+              <div class="av-card-title-row">
+                <mat-icon>history</mat-icon>
+                <h2 class="av-section-title">Submission Info</h2>
+              </div>
+            </div>
+            <div class="av-side-info">
+              <div class="av-side-row">
+                <span class="av-side-label">File</span>
+                <span class="av-side-value">{{ sub.fileName || '—' }}</span>
+              </div>
+              @if (sub.marks != null && sub.marks != undefined) {
+                <div class="av-side-row">
+                  <span class="av-side-label">Score</span>
+                  <span class="av-side-value av-side-value--score">{{ sub.marks }}/{{ a.maxMarks }}</span>
+                </div>
+              }
+              <div class="av-side-row">
+                <span class="av-side-label">Status</span>
+                <span class="av-side-badge"
+                  [class.av-side-badge--evaluated]="sub.status === 'evaluated'"
+                  [class.av-side-badge--submitted]="sub.status === 'submitted'">
+                  {{ sub.status === 'evaluated' ? 'Evaluated' : 'Pending' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <button class="av-week-btn" (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+          <div>
+            <span class="av-week-btn-label">Back to Week</span>
+            <span class="av-week-btn-sub">View all assignments for this week</span>
+          </div>
+        </button>
+      </div>
+    </div>
+    }
+  }
+</div>

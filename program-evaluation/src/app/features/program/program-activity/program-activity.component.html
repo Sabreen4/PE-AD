@@ -1,0 +1,24 @@
+
+    <div class="page">
+      <app-back-nav fallbackRoute="/program" />
+      <div class="page-header">
+        <h2>Activities</h2>
+        <button mat-flat-button color="primary" (click)="openCreate()">
+          <mat-icon>add</mat-icon>
+          Add activity
+        </button>
+      </div>
+
+      <div class="card">
+        <app-entity-table
+          [columns]="columns"
+          [data]="activities()"
+          [loading]="loading()"
+          emptyTitle="No activities yet"
+          emptyHint="Add activities to this week."
+          (edit)="openEdit($event)"
+          (delete)="remove($event)">
+        </app-entity-table>
+      </div>
+    </div>
+  

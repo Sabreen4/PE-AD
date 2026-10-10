@@ -1,0 +1,48 @@
+.breadcrumb-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 2px 0;
+}
+
+.breadcrumb-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-ui, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.breadcrumb-link {
+  color: var(--color-ink, #1c2b2e);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s, text-decoration 0.15s;
+  cursor: pointer;
+
+  &:hover {
+    color: #1a56db;
+    text-decoration: underline;
+  }
+}
+
+.breadcrumb-current {
+  color: #1a56db;
+  font-weight: 700;
+}
+
+.breadcrumb-separator {
+  color: var(--color-ink-faint, #8b9598);
+  flex-shrink: 0;
+}

@@ -1,0 +1,100 @@
+
+    <div class="detail-overlay">
+      <div class="detail-header">
+        <div class="detail-avatar">{{ initials }}</div>
+        <div class="detail-heading">
+          <h2 class="detail-name">{{ data.firstName }} {{ data.lastName }}</h2>
+          <span class="detail-role">{{ data.role }}</span>
+        </div>
+        <button class="detail-close" (click)="close()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="detail-body">
+        <section class="detail-section">
+          <h3 class="detail-section-title">Basic Information</h3>
+          <dl class="detail-grid">
+            <div class="detail-field">
+              <dt>First Name</dt>
+              <dd>{{ data.firstName }}</dd>
+            </div>
+            <div class="detail-field">
+              <dt>Last Name</dt>
+              <dd>{{ data.lastName }}</dd>
+            </div>
+            <div class="detail-field">
+              <dt>Email</dt>
+              <dd>{{ data.email }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="detail-section">
+          <h3 class="detail-section-title">Contact Information</h3>
+          <dl class="detail-grid">
+            <div class="detail-field" [class.detail-field--empty]="!data.phone">
+              <dt>Phone</dt>
+              <dd>{{ data.phone || '—' }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="detail-section">
+          <h3 class="detail-section-title">Organization Details</h3>
+          <dl class="detail-grid">
+            <div class="detail-field">
+              <dt>Organization</dt>
+              <dd>{{ data.organizationName || '—' }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="detail-section">
+          <h3 class="detail-section-title">Role Information</h3>
+          <dl class="detail-grid">
+            <div class="detail-field">
+              <dt>Role</dt>
+              <dd><span class="detail-badge">{{ data.role }}</span></dd>
+            </div>
+            <div class="detail-field">
+              <dt>Roles</dt>
+              <dd>{{ data.roles?.join(', ') || '—' }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="detail-section">
+          <h3 class="detail-section-title">Account Status</h3>
+          <dl class="detail-grid">
+            <div class="detail-field">
+              <dt>Status</dt>
+              <dd>
+                <span class="stamp" [class.stamp--success]="data.isActive" [class.stamp--danger]="!data.isActive">
+                  {{ data.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="detail-section">
+          <h3 class="detail-section-title">Additional Details</h3>
+          <dl class="detail-grid">
+            <div class="detail-field">
+              <dt>Created</dt>
+              <dd>{{ data.createdAt | date:'medium' }}</dd>
+            </div>
+            <div class="detail-field">
+              <dt>Last Updated</dt>
+              <dd>{{ data.updatedAt | date:'medium' }}</dd>
+            </div>
+          </dl>
+        </section>
+      </div>
+
+      <div class="detail-footer">
+        <button class="btn" (click)="close()">Close</button>
+      </div>
+    </div>
+  

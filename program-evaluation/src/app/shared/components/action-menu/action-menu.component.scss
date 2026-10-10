@@ -1,0 +1,27 @@
+
+    .action-menu__trigger {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--color-ink-muted);
+      transition: background 0.12s, color 0.12s;
+      padding: 0;
+    }
+    .action-menu__trigger:hover {
+      background: var(--color-surface-sunken);
+      color: var(--color-ink);
+    }
+    .action-menu__item--danger {
+      color: var(--color-danger) !important;
+    }
+    .action-menu__item--danger mat-icon {
+      color: var(--color-danger) !important;
+    }
+  

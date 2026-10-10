@@ -1,0 +1,55 @@
+<div class="emp-page">
+  <app-back-nav fallbackRoute="/employee/dashboard" />
+  <div class="emp-header">
+    <p class="emp-eyebrow">Programs</p>
+    <h1 class="emp-title">My Programs</h1>
+    <p class="emp-subtitle">Programs you are enrolled in</p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="state-box">
+      <div class="spinner"></div>
+      <span>Loading programs...</span>
+    </div>
+  } @else if (errorMessage() !== null) {
+    <div class="state-box state-error">{{ errorMessage() }}</div>
+  } @else if (programs().length === 0) {
+    <div class="state-box state-empty">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <h3>No programs yet</h3>
+      <p>You are not enrolled in any programs at the moment.</p>
+    </div>
+  } @else {
+    <div class="program-grid">
+      @for (p of programs(); track p.id) {
+        <div class="program-card">
+          <div class="pc-content">
+            <div class="pc-header">
+              <h3 class="pc-name">{{ p.name }}</h3>
+              <span class="pc-status" [class.active]="p.isActive !== false" [class.inactive]="p.isActive === false">
+                {{ p.isActive === false ? 'Inactive' : 'Active' }}
+              </span>
+            </div>
+
+            <p class="pc-desc">{{ p.description || 'Enrolled skill building and evaluation track.' }}</p>
+
+            <div class="pc-meta">
+              <div class="pc-meta-item">
+                <span class="pc-meta-label">Duration</span>
+                <span class="pc-meta-value">{{ p.durationWeeks ?? p.totalWeeks ?? '—' }} weeks</span>
+              </div>
+              <div class="pc-meta-item">
+                <span class="pc-meta-label">Start Date</span>
+                <span class="pc-meta-value">{{ p.startDate ? (p.startDate | date:'mediumDate') : '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <a [routerLink]="['/employee/programs', p.id]" class="pc-action">View Weeks</a>
+        </div>
+      }
+    </div>
+  }
+</div>

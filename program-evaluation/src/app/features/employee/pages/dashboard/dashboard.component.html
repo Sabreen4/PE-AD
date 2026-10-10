@@ -1,0 +1,160 @@
+<div class="emp-page">
+  <app-back-nav fallbackRoute="/employee" />
+
+  <!-- Dashboard Header -->
+  <div class="emp-header-card">
+    <div class="emp-header-main">
+      <div class="emp-header-info">
+        <p class="emp-eyebrow">Employee Portal Dashboard</p>
+        <h1 class="emp-title">Welcome, {{ user()?.email }}</h1>
+        <p class="emp-subtitle">Overview of your active training programs, assignments, attendance & performance milestones.</p>
+      </div>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="emp-loading"><div class="emp-spinner"></div><span>Loading dashboard overview...</span></div>
+  } @else {
+    <!-- Common Performance Summary Cards -->
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="sc-icon sc-icon--programs">
+          <mat-icon>school</mat-icon>
+        </div>
+        <div class="sc-body">
+          <span class="sc-value">{{ totalPrograms() }}</span>
+          <span class="sc-label">Enrolled Programs</span>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="sc-icon sc-icon--assignments">
+          <mat-icon>assignment</mat-icon>
+        </div>
+        <div class="sc-body">
+          <span class="sc-value">Active</span>
+          <span class="sc-label">Assignments & Tasks</span>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="sc-icon sc-icon--attendance">
+          <mat-icon>fact_check</mat-icon>
+        </div>
+        <div class="sc-body">
+          <span class="sc-value">Tracked</span>
+          <span class="sc-label">Program Attendance</span>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="sc-icon sc-icon--rank">
+          <mat-icon>workspace_premium</mat-icon>
+        </div>
+        <div class="sc-body">
+          <span class="sc-value">Rankings</span>
+          <span class="sc-label">Program Leaderboard</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Programs Overview -->
+    <div class="emp-section">
+      <div class="emp-section-header">
+        <h2 class="emp-section-title">
+          <mat-icon>auto_stories</mat-icon>
+          My Active Training Programs
+        </h2>
+        <a routerLink="/employee/programs" class="emp-section-link">View All &rarr;</a>
+      </div>
+
+      @if (programs().length === 0) {
+        <div class="emp-empty-card">
+          <mat-icon class="empty-icon">school</mat-icon>
+          <h3>No Enrolled Programs</h3>
+          <p>You are currently not enrolled in any active training programs.</p>
+        </div>
+      } @else {
+        <div class="program-grid">
+          @for (p of programs(); track p.id) {
+            <div class="program-card">
+              <div class="pc-header">
+                <div class="pc-icon">
+                  <mat-icon>folder_open</mat-icon>
+                </div>
+                <div class="pc-title-area">
+                  <h3 class="pc-title">{{ p.name }}</h3>
+                  <span class="pc-badge">Active Track</span>
+                </div>
+              </div>
+              <p class="pc-description">{{ p.description || 'Continuous skill building and practical evaluation program.' }}</p>
+              <div class="pc-meta">
+                <div class="pc-meta-item">
+                  <mat-icon>date_range</mat-icon>
+                  <span>{{ p.durationWeeks ?? p.totalWeeks ?? '—' }} Weeks</span>
+                </div>
+                <div class="pc-meta-item">
+                  <mat-icon>person</mat-icon>
+                  <span>Evaluator Assigned</span>
+                </div>
+              </div>
+              <div class="pc-actions">
+                <a routerLink="/employee/assignments" class="pc-btn pc-btn--primary">
+                  <mat-icon>assignment</mat-icon> View Assignments
+                </a>
+                <a routerLink="/employee/progress-timeline" class="pc-btn pc-btn--outline">
+                  <mat-icon>timeline</mat-icon> Timeline
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Quick Navigation Hub -->
+    <div class="emp-section">
+      <h2 class="emp-section-title">
+        <mat-icon>grid_view</mat-icon>
+        Quick Access Hub
+      </h2>
+      <div class="action-cards">
+        <a routerLink="/employee/programs" class="action-card">
+          <div class="ac-icon"><mat-icon>school</mat-icon></div>
+          <span class="ac-title">My Programs</span>
+          <span class="ac-desc">View enrolled training courses and curriculum schedules</span>
+        </a>
+        <a routerLink="/employee/assignments" class="action-card">
+          <div class="ac-icon"><mat-icon>assignment_turned_in</mat-icon></div>
+          <span class="ac-title">Assignments</span>
+          <span class="ac-desc">Submit weekly tasks, track status and instructor reviews</span>
+        </a>
+        <a routerLink="/employee/progress-timeline" class="action-card">
+          <div class="ac-icon"><mat-icon>account_tree</mat-icon></div>
+          <span class="ac-title">Progress Timeline</span>
+          <span class="ac-desc">Track weekly milestones and module achievements</span>
+        </a>
+        <a routerLink="/employee/attendance" class="action-card">
+          <div class="ac-icon"><mat-icon>fact_check</mat-icon></div>
+          <span class="ac-title">Attendance</span>
+          <span class="ac-desc">Check session attendance logs and status</span>
+        </a>
+        <a routerLink="/employee/feedback" class="action-card">
+          <div class="ac-icon"><mat-icon>feedback</mat-icon></div>
+          <span class="ac-title">Evaluator Feedback</span>
+          <span class="ac-desc">Read instructor reviews and improvement tips</span>
+        </a>
+        <a routerLink="/employee/weekly-score" class="action-card">
+          <div class="ac-icon"><mat-icon>bar_chart</mat-icon></div>
+          <span class="ac-title">Weekly Score</span>
+          <span class="ac-desc">Inspect weekly score breakdowns and engagement grades</span>
+        </a>
+        <a routerLink="/employee/leaderboard" class="action-card">
+          <div class="ac-icon"><mat-icon>leaderboard</mat-icon></div>
+          <span class="ac-title">Leaderboard</span>
+          <span class="ac-desc">Benchmark performance against top peer rankings</span>
+        </a>
+      </div>
+    </div>
+  }
+</div>

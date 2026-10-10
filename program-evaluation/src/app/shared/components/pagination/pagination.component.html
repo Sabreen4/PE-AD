@@ -1,0 +1,47 @@
+@if (showPagination()) {
+  <div class="pagination-bar">
+    <div class="pagination-info">
+      Showing {{ startRecord() }}&ndash;{{ endRecord() }} of {{ totalRecords() }}
+      @if (isLoading()) {
+        <span class="pagination-loading">
+          <span class="spinner-sm"></span>
+        </span>
+      }
+    </div>
+    <div class="pagination-controls">
+      <button
+        class="page-btn"
+        [disabled]="currentPage() === 1 || isLoading()"
+        (click)="goToPage(currentPage() - 1)"
+        aria-label="Previous page">
+        &larr; Prev
+      </button>
+      @for (p of pageNumbers(); track p) {
+        <button
+          class="page-btn"
+          [class.active]="p === currentPage()"
+          [disabled]="isLoading()"
+          (click)="goToPage(p)">
+          {{ p }}
+        </button>
+      }
+      <button
+        class="page-btn"
+        [disabled]="currentPage() === totalPages() || isLoading()"
+        (click)="goToPage(currentPage() + 1)"
+        aria-label="Next page">
+        Next &rarr;
+      </button>
+    </div>
+    <div class="pagination-size">
+      <select
+        [ngModel]="pageSize()"
+        (ngModelChange)="onPageSizeChange($event)"
+        [disabled]="isLoading()">
+        @for (size of pageSizes(); track size) {
+          <option [value]="size">{{ size }} / page</option>
+        }
+      </select>
+    </div>
+  </div>
+}

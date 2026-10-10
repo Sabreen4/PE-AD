@@ -1,0 +1,103 @@
+<div class="page">
+  <app-back-nav fallbackRoute="/employee" />
+  <div class="ws-header-card">
+    <div class="ws-header-main">
+      <div class="ws-header-info">
+        <h1 class="ws-title">Weekly Score</h1>
+        <p class="ws-subtitle">View your weekly evaluation performance and scores</p>
+      </div>
+
+      @if (!isLoading() && programs().length > 0) {
+        <div class="ws-filter-row">
+          <div class="ws-filter-item">
+            <label class="ws-filter-label">Program Track</label>
+            <p-dropdown
+              [options]="programs()"
+              optionLabel="name"
+              optionValue="id"
+              [ngModel]="selectedProgramId()"
+              (ngModelChange)="onProgramChange($event)"
+              placeholder="Select Program"
+              styleClass="as-dropdown-control">
+            </p-dropdown>
+          </div>
+          <div class="ws-filter-item">
+            <label class="ws-filter-label">Program Week</label>
+            <p-dropdown
+              [options]="formattedWeeks()"
+              optionLabel="label"
+              optionValue="id"
+              [ngModel]="selectedWeekId()"
+              (ngModelChange)="onWeekChange($event)"
+              placeholder="Select Week"
+              styleClass="as-dropdown-control">
+            </p-dropdown>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="state-box"><div class="spinner"></div><span>Loading...</span></div>
+  } @else {
+
+    @if (evaluation(); as ev) {
+      <div class="score-card">
+        <div class="score-card-header">
+          <span class="score-card-title">Evaluation Summary</span>
+          <span class="status-badge status-badge--success">{{ ev.status }}</span>
+        </div>
+        <div class="score-card-body">
+          <div class="score-grid">
+            <div class="score-item">
+              <span class="score-label">Attendance Percentage</span>
+              <span class="score-value">{{ ev.attendancePercentage }}%</span>
+            </div>
+            <div class="score-item">
+              <span class="score-label">Attendance Score</span>
+              <span class="score-value score-value--badge">{{ ev.attendanceScore }} / 3</span>
+            </div>
+            <div class="score-item">
+              <span class="score-label">Engagement Score</span>
+              <span class="score-value score-value--badge">{{ ev.engagementScore }} / 3</span>
+            </div>
+            <div class="score-item">
+              <span class="score-label">Application Score</span>
+              <span class="score-value score-value--badge">{{ ev.applicationScore }} / 3</span>
+            </div>
+            <div class="score-item score-item--highlight">
+              <span class="score-label">Weekly Score</span>
+              <span class="score-value score-value--large"
+                [class.text-green]="ev.weeklyAverage >= 2.5"
+                [class.text-amber]="ev.weeklyAverage >= 1.5 && ev.weeklyAverage < 2.5"
+                [class.text-red]="ev.weeklyAverage < 1.5">
+                {{ ev.weeklyAverage.toFixed(1) }} / 3
+              </span>
+            </div>
+            @if (ev.lastUpdated) {
+              <div class="score-item score-item--full">
+                <span class="score-label">Last Updated</span>
+                <span class="score-value">{{ ev.lastUpdated | date:'MMM d, yyyy h:mm a' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (selectedProgramId() && selectedWeekId() && !evaluation() && !isLoading()) {
+      <div class="state-box state-empty">
+        <h3>No evaluation data</h3>
+        <p>Select a different week or program to view your scores.</p>
+      </div>
+    }
+
+    @if (!selectedProgramId() && !isLoading()) {
+      <div class="state-box state-select">
+        <h3>Select a program and week</h3>
+        <p>Choose a program and week above to view your evaluation.</p>
+      </div>
+    }
+  }
+</div>

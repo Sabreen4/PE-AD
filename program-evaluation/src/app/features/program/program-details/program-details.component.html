@@ -1,0 +1,38 @@
+
+    @if (loading()) {
+      <app-loading-spinner label="Loading program…" />
+    } @else {
+      @let p = program();
+      @if (p) {
+      <div class="page">
+        <app-back-nav fallbackRoute="/program" />
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Program Evaluation</div>
+            <h1>{{ p.name }}</h1>
+          </div>
+        </div>
+
+        <div class="card">
+          <table class="detail-table">
+            <tr><td>Code</td><td class="mono-cell">{{ p.code }}</td></tr>
+            <tr><td>Organization</td><td>{{ p.organizationName }}</td></tr>
+            <tr><td>Description</td><td>{{ p.description || '—' }}</td></tr>
+            <tr><td>Start date</td><td>{{ p.startDate | date }}</td></tr>
+            <tr><td>End date</td><td>{{ p.endDate | date }}</td></tr>
+            <tr><td>Total weeks</td><td>{{ p.totalWeeks }}</td></tr>
+            <tr><td>Status</td><td>{{ p.isActive ? 'Active' : 'Inactive' }}</td></tr>
+          </table>
+        </div>
+
+        <nav mat-tab-nav-bar>
+          <a mat-tab-link [routerLink]="['weeks']" routerLinkActive #rla1="routerLinkActive" [active]="rla1.isActive">Weeks</a>
+          <a mat-tab-link [routerLink]="['enrollments']" routerLinkActive #rla2="routerLinkActive" [active]="rla2.isActive">Enrollments</a>
+          <a mat-tab-link [routerLink]="['activities']" routerLinkActive #rla3="routerLinkActive" [active]="rla3.isActive">Activities</a>
+        </nav>
+
+        <router-outlet />
+      </div>
+      }
+    }
+  

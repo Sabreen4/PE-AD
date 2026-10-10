@@ -1,0 +1,28 @@
+
+    <div class="page">
+      <app-back-nav fallbackRoute="/" />
+      <div class="page-header">
+        <div>
+          <div class="eyebrow">Program Evaluation</div>
+          <h1>Programs</h1>
+        </div>
+        <button mat-flat-button color="primary" (click)="openCreate()">
+          <mat-icon>add</mat-icon>
+          Add program
+        </button>
+      </div>
+
+      <div class="card">
+        <app-entity-table
+          [columns]="columns"
+          [data]="programs()"
+          [loading]="loading()"
+          emptyTitle="No programs yet"
+          emptyHint="Create a program to start tracking weeks, enrollments, and activities."
+          (edit)="openEdit($event)"
+          (delete)="toggleActive($event)"
+          (rowClick)="viewDetails($event)">
+        </app-entity-table>
+      </div>
+    </div>
+  

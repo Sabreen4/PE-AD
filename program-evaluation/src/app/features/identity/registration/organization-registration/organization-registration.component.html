@@ -1,0 +1,250 @@
+<!-- TopAppBar -->
+<header class="top-app-bar">
+  <button class="top-bar-back" (click)="goBack()" type="button">
+    <span class="material-symbols-outlined">arrow_back</span>
+  </button>
+  <h1 class="top-bar-title">Program Evaluation &amp; Analytics Dashboard</h1>
+</header>
+
+<main class="reg-main">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2 class="page-title">Create Organization Account</h2>
+    <p class="page-description">Register your organization and administrator account to access the Evaluation Dashboard.</p>
+  </div>
+
+  <!-- Progress Indicator -->
+  <div class="progress-row">
+    @for (step of steps(); track step.label; let i = $index; let last = $last) {
+      <div class="progress-step" [class.completed]="step.status === 'completed'" [class.active]="step.status === 'active'">
+        <div class="step-circle">
+          @if (step.status === 'completed') {
+            <span class="material-symbols-outlined">check_circle</span>
+          } @else {
+            <span class="material-symbols-outlined">{{ step.icon }}</span>
+          }
+        </div>
+        <span class="step-label">{{ step.label }}</span>
+      </div>
+      @if (!last) {
+        <div class="step-line" [class.line-completed]="step.status === 'completed'"></div>
+      }
+    }
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="reg-form" id="registrationForm">
+
+    <div class="form-card-grid">
+      <!-- Section 1: Organization Information -->
+      <section class="form-card">
+        <div class="card-header">
+          <div class="card-icon-box">
+            <span class="material-symbols-outlined">corporate_fare</span>
+          </div>
+          <div>
+            <span class="card-step-badge">Step 1</span>
+            <h3 class="card-title">Organization Information</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="field-group">
+            <div class="floating-field">
+              <input
+                id="org_name"
+                type="text"
+                formControlName="organizationName"
+                placeholder=" "
+                [class.field-error-border]="f['organizationName'].invalid && (f['organizationName'].dirty || f['organizationName'].touched)"
+              />
+              <label for="org_name" [class.label-error]="f['organizationName'].invalid && (f['organizationName'].dirty || f['organizationName'].touched)">
+                Organization Name
+              </label>
+            </div>
+            <div class="field-error" *ngIf="f['organizationName'].invalid && (f['organizationName'].dirty || f['organizationName'].touched)">
+              <span *ngIf="f['organizationName'].errors?.['required']">Organization name is required</span>
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="floating-field">
+              <input
+                id="org_email"
+                type="email"
+                formControlName="organizationEmail"
+                placeholder=" "
+                [class.field-error-border]="f['organizationEmail'].invalid && (f['organizationEmail'].dirty || f['organizationEmail'].touched)"
+              />
+              <label for="org_email" [class.label-error]="f['organizationEmail'].invalid && (f['organizationEmail'].dirty || f['organizationEmail'].touched)">
+                Business Email
+              </label>
+            </div>
+            <div class="field-error" *ngIf="f['organizationEmail'].invalid && (f['organizationEmail'].dirty || f['organizationEmail'].touched)">
+              <span *ngIf="f['organizationEmail'].errors?.['required']">Business email is required</span>
+              <span *ngIf="f['organizationEmail'].errors?.['email']">Enter a valid email</span>
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="floating-field">
+              <input
+                id="org_phone"
+                type="tel"
+                formControlName="organizationPhone"
+                placeholder=" "
+                [class.field-error-border]="f['organizationPhone'].invalid && (f['organizationPhone'].dirty || f['organizationPhone'].touched)"
+              />
+              <label for="org_phone" [class.label-error]="f['organizationPhone'].invalid && (f['organizationPhone'].dirty || f['organizationPhone'].touched)">
+                Phone Number
+              </label>
+            </div>
+            <div class="field-error" *ngIf="f['organizationPhone'].invalid && (f['organizationPhone'].dirty || f['organizationPhone'].touched)">
+              <span *ngIf="f['organizationPhone'].errors?.['required']">Phone number is required</span>
+              <span *ngIf="f['organizationPhone'].errors?.['pattern']">Must be exactly 10 digits</span>
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="floating-field">
+              <input
+                id="city"
+                type="text"
+                formControlName="city"
+                placeholder=" "
+                [class.field-error-border]="f['city'].invalid && (f['city'].dirty || f['city'].touched)"
+              />
+              <label for="city" [class.label-error]="f['city'].invalid && (f['city'].dirty || f['city'].touched)">
+                City
+              </label>
+            </div>
+            <div class="field-error" *ngIf="f['city'].invalid && (f['city'].dirty || f['city'].touched)">
+              <span *ngIf="f['city'].errors?.['required']">City is required</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Administrator Details -->
+      <section class="form-card">
+        <div class="card-header">
+          <div class="card-icon-box">
+            <span class="material-symbols-outlined">person</span>
+          </div>
+          <div>
+            <span class="card-step-badge">Step 2</span>
+            <h3 class="card-title">Administrator Details</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="field-grid-2">
+            <div class="field-group">
+              <div class="floating-field">
+                <input
+                  id="first_name"
+                  type="text"
+                  formControlName="adminFirstName"
+                  placeholder=" "
+                  [class.field-error-border]="f['adminFirstName'].invalid && (f['adminFirstName'].dirty || f['adminFirstName'].touched)"
+                />
+                <label for="first_name" [class.label-error]="f['adminFirstName'].invalid && (f['adminFirstName'].dirty || f['adminFirstName'].touched)">
+                  First Name
+                </label>
+              </div>
+              <div class="field-error" *ngIf="f['adminFirstName'].invalid && (f['adminFirstName'].dirty || f['adminFirstName'].touched)">
+                <span *ngIf="f['adminFirstName'].errors?.['required']">First name is required</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="floating-field">
+                <input
+                  id="last_name"
+                  type="text"
+                  formControlName="adminLastName"
+                  placeholder=" "
+                  [class.field-error-border]="f['adminLastName'].invalid && (f['adminLastName'].dirty || f['adminLastName'].touched)"
+                />
+                <label for="last_name" [class.label-error]="f['adminLastName'].invalid && (f['adminLastName'].dirty || f['adminLastName'].touched)">
+                  Last Name
+                </label>
+              </div>
+              <div class="field-error" *ngIf="f['adminLastName'].invalid && (f['adminLastName'].dirty || f['adminLastName'].touched)">
+                <span *ngIf="f['adminLastName'].errors?.['required']">Last name is required</span>
+              </div>
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="floating-field">
+              <input
+                id="admin_email"
+                type="email"
+                formControlName="adminEmail"
+                placeholder=" "
+                [class.field-error-border]="f['adminEmail'].invalid && (f['adminEmail'].dirty || f['adminEmail'].touched)"
+              />
+              <label for="admin_email" [class.label-error]="f['adminEmail'].invalid && (f['adminEmail'].dirty || f['adminEmail'].touched)">
+                Personal Email
+              </label>
+            </div>
+            <div class="field-error" *ngIf="f['adminEmail'].invalid && (f['adminEmail'].dirty || f['adminEmail'].touched)">
+              <span *ngIf="f['adminEmail'].errors?.['required']">Email is required</span>
+              <span *ngIf="f['adminEmail'].errors?.['email']">Enter a valid email</span>
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="floating-field">
+              <input
+                id="admin_phone"
+                type="tel"
+                formControlName="adminPhone"
+                placeholder=" "
+                [class.field-error-border]="f['adminPhone'].invalid && (f['adminPhone'].dirty || f['adminPhone'].touched)"
+              />
+              <label for="admin_phone" [class.label-error]="f['adminPhone'].invalid && (f['adminPhone'].dirty || f['adminPhone'].touched)">
+                Direct Phone
+              </label>
+            </div>
+            <div class="field-error" *ngIf="f['adminPhone'].invalid && (f['adminPhone'].dirty || f['adminPhone'].touched)">
+              <span *ngIf="f['adminPhone'].errors?.['required']">Phone number is required</span>
+              <span *ngIf="f['adminPhone'].errors?.['pattern']">Must be exactly 10 digits</span>
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="floating-field">
+              <select
+                id="admin_gender"
+                formControlName="adminGender"
+                class="field-select"
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+              <label for="admin_gender" [class.label-float]="!!f['adminGender'].value">Gender</label>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn-outline" (click)="goBack()">Back</button>
+      <button type="submit" class="btn-primary" [disabled]="registrationForm.invalid || isLoading()">
+        <span *ngIf="isLoading()" class="btn-spinner"></span>
+        {{ isLoading() ? 'Registering...' : 'Register Organization' }}
+      </button>
+    </div>
+
+  </form>
+</main>
+
+<!-- Footer -->
+<footer class="reg-footer">
+  <div class="footer-left">
+    <span>Institutional Analytics & Evaluation Division</span>
+  </div>
+  <div class="footer-links">
+    <a href="#">Terms of Service</a>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Technical Support</a>
+  </div>
+  <p class="footer-copy">&copy; 2024 Institutional Analytics & Evaluation Division. Proprietary and Confidential.</p>
+</footer>

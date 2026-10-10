@@ -1,0 +1,40 @@
+
+    <div class="weekly-evaluations-container">
+      <app-back-nav fallbackRoute="/" />
+      <div class="header">
+        <h2>Weekly Evaluations</h2>
+        <button mat-raised-button color="primary" (click)="load()">Refresh</button>
+      </div>
+
+      @if (loading()) {
+        <app-loading-spinner />
+      } @else if (evaluations().length === 0) {
+        <app-empty-state message="No weekly evaluations found." />
+      } @else {
+        <table mat-table [dataSource]="evaluations()" class="mat-elevation-z2">
+          <ng-container matColumnDef="employeeName">
+            <th mat-header-cell *matHeaderCellDef>Employee</th>
+            <td mat-cell *matCellDef="let e">{{ e.employeeName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="weekStart">
+            <th mat-header-cell *matHeaderCellDef>Week Start</th>
+            <td mat-cell *matCellDef="let e">{{ e.weekStart }}</td>
+          </ng-container>
+          <ng-container matColumnDef="weekEnd">
+            <th mat-header-cell *matHeaderCellDef>Week End</th>
+            <td mat-cell *matCellDef="let e">{{ e.weekEnd }}</td>
+          </ng-container>
+          <ng-container matColumnDef="score">
+            <th mat-header-cell *matHeaderCellDef>Score</th>
+            <td mat-cell *matCellDef="let e">{{ e.score }} / {{ e.maxScore }}</td>
+          </ng-container>
+          <ng-container matColumnDef="evaluatedBy">
+            <th mat-header-cell *matHeaderCellDef>Evaluated By</th>
+            <td mat-cell *matCellDef="let e">{{ e.evaluatedBy }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      }
+    </div>
+  

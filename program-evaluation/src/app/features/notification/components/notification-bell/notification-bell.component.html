@@ -1,0 +1,7 @@
+
+    <button mat-icon-button (click)="service.toggleDrawer()" aria-label="Notifications"
+            [matBadge]="service.unreadCount() > 0 ? service.unreadCount() : undefined"
+            matBadgeColor="warn" matBadgeSize="small">
+      <mat-icon>notifications_none</mat-icon>
+    </button>
+  

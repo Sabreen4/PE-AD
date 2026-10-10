@@ -1,0 +1,22 @@
+<div class="page">
+  <app-back-nav fallbackRoute="/" />
+  <div class="page-header">
+    <div>
+      <h2>{{ labels.pageTitle }}</h2>
+    </div>
+    <button mat-flat-button color="primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon> {{ labels.addButton }}
+    </button>
+  </div>
+  <div class="card">
+    <app-entity-table
+      [columns]="columns"
+      [data]="users()"
+      [loading]="loading()"
+      [emptyTitle]="labels.emptyTitle"
+      [emptyHint]="labels.emptyHint"
+      (edit)="openEdit($event)"
+      (delete)="deactivate($event)">
+    </app-entity-table>
+  </div>
+</div>

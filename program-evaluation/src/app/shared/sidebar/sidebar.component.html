@@ -1,0 +1,70 @@
+<aside
+  class="sidebar"
+  [class.sidebar--collapsed]="collapsed"
+  [class.sidebar--mobile-open]="mobileOpen"
+>
+  <div class="sidebar__brand">
+    <div class="sidebar__brand-row">
+      <div class="sidebar__logo">
+        <mat-icon>emoji_events</mat-icon>
+      </div>
+      @if (!collapsed) {
+        <div class="sidebar__brand-text">
+          <div class="sidebar__brand-name">{{ brand }}</div>
+          <div class="sidebar__brand-sub">Evaluation</div>
+        </div>
+      }
+    </div>
+
+    <button
+      class="sidebar__toggle sidebar__toggle--desktop"
+      (click)="toggleCollapsed()"
+      [title]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+    >
+      <mat-icon>{{ collapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+    </button>
+    <button class="sidebar__toggle sidebar__toggle--mobile" (click)="onMobileClose()" title="Close menu">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <nav class="sidebar__nav">
+    @if (!collapsed) {
+      <div class="sidebar__section-label">Navigation</div>
+    }
+
+    @for (item of navItems; track item.route) {
+      <a
+        class="sidebar__nav-item"
+        [routerLink]="item.route"
+        routerLinkActive="sidebar__nav-item--active"
+        [routerLinkActiveOptions]="{ exact: false }"
+        [title]="collapsed ? item.label : ''"
+        (click)="onMobileClose()"
+      >
+        <mat-icon>{{ item.icon }}</mat-icon>
+        @if (!collapsed) {
+          <span class="sidebar__nav-label">{{ item.label }}</span>
+          @if (item.badge) {
+            <span class="sidebar__nav-badge">{{ item.badge }}</span>
+          }
+        }
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar__footer">
+    <button class="sidebar__settings-btn" (click)="settingsClick.emit()" [title]="collapsed ? 'Settings' : ''">
+      <mat-icon>settings</mat-icon>
+      @if (!collapsed) {
+        <span class="sidebar__settings-label">Settings</span>
+      }
+    </button>
+    <div class="sidebar__footer-version">v1.0.0</div>
+    <div class="sidebar__footer-copy">PE & DA Platform</div>
+  </div>
+</aside>
+
+@if (mobileOpen) {
+  <div class="sidebar-backdrop" (click)="onMobileClose()"></div>
+}

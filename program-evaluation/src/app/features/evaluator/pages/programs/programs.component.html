@@ -1,0 +1,97 @@
+<div class="page-page">
+  <app-back-nav fallbackRoute="/evaluator"/>
+  <div class="page-header-row">
+    <div>
+      <p class="page-eyebrow">Program Management</p>
+      <h1 class="page-title">Programs</h1>
+      <p class="page-subtitle" *ngIf="!isLoading()">
+        {{ totalRecords() }} {{ totalRecords() === 1 ? 'program' : 'programs' }}
+      </p>
+    </div>
+    <a routerLink="/evaluator/programs/create" class="btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Program
+    </a>
+  </div>
+
+  <div class="page-toolbar">
+    <div class="search-wrapper">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        #progSearchInput
+        type="text"
+        class="search-input"
+        placeholder="Search programs (min 3 characters)..."
+        (input)="onSearchInput($event)" />
+      @if (searchQuery()) {
+        <button class="search-clear" (click)="clearSearch(progSearchInput)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="page-card">
+    @if (isLoading()) {
+      <div class="state-box">
+        <div class="spinner"></div>
+        <span>Loading programs...</span>
+      </div>
+    } @else if (errorMessage() !== null) {
+      <div class="state-box state-error">
+        {{ errorMessage() }}
+      </div>
+    } @else if (programs().length === 0 && searchQuery()) {
+      <div class="state-box state-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <h3>No records found</h3>
+        <p>No programs match your search. Try different keywords.</p>
+      </div>
+    } @else if (programs().length === 0) {
+      <div class="state-box state-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        <h3>No programs yet</h3>
+        <p>Create your first program to get started.</p>
+      </div>
+    } @else {
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="col-name">Name</th>
+              <th class="col-desc">Description</th>
+              <th class="col-duration">Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (prog of programs(); track prog.id) {
+              <tr (click)="navigateToDetail(prog.id)" class="clickable-row">
+                <td class="col-name">{{ prog.name }}</td>
+                <td class="col-desc">{{ prog.description || '\u2014' }}</td>
+                <td class="col-duration">{{ prog.durationWeeks ?? prog.totalWeeks }} weeks</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <app-pagination
+        [currentPage]="currentPage()"
+        [totalRecords]="totalRecords()"
+        [pageSize]="pageSize()"
+        [isLoading]="isLoading()"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="onPageSizeChange($event)" />
+    }
+  </div>
+</div>

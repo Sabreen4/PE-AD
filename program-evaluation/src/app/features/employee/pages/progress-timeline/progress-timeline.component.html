@@ -1,0 +1,359 @@
+<div class="tl-page">
+  <app-back-nav fallbackRoute="/employee" />
+  <div class="tl-header-card">
+    <div class="tl-header-main">
+      <div class="tl-header-info">
+        <h1 class="tl-title">
+          <mat-icon class="tl-title-icon">account_tree</mat-icon>
+          Progress Timeline
+        </h1>
+        <p class="tl-subtitle">Track your weekly milestones and module achievements</p>
+      </div>
+
+      @if (!isLoading() && programs().length > 0) {
+        <div class="tl-program-filter">
+          <label class="tl-filter-label">Program Track</label>
+          <p-dropdown
+            [options]="programs()"
+            optionLabel="name"
+            optionValue="id"
+            [ngModel]="selectedProgramId()"
+            (ngModelChange)="onProgramChange($event)"
+            placeholder="Choose a program..."
+            styleClass="as-dropdown-control">
+          </p-dropdown>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="tl-state tl-state--loading">
+      <div class="tl-spinner"></div>
+      <span>Loading enrolled programs...</span>
+    </div>
+  } @else {
+
+    @if (selectedProgramId() && isLoadingDetails()) {
+      <div class="tl-state tl-state--loading"><div class="tl-spinner"></div><span>Loading timeline...</span></div>
+    } @else if (selectedProgramId()) {
+      @let errMsg = errorMessage();
+      @if (errMsg) {
+        <div class="tl-state" [class.tl-state--403]="errorType() === 'forbidden'"
+             [class.tl-state--404]="errorType() === 'notfound'"
+             [class.tl-state--401]="errorType() === 'network'">
+          <mat-icon>
+            @if (errorType() === 'forbidden') { lock }
+            @else if (errorType() === 'notfound') { search_off }
+            @else if (errorType() === 'network') { wifi_off }
+            @else { error_outline }
+          </mat-icon>
+          <h3>
+            @if (errorType() === 'forbidden') { Access Denied }
+            @else if (errorType() === 'notfound') { Not Found }
+            @else if (errorType() === 'network') { Connection Error }
+            @else { Something went wrong }
+          </h3>
+          <p>{{ errMsg }}</p>
+        </div>
+      } @else {
+      @let prog = selectedProgram();
+      @let enroll = enrollment();
+      @let progId = selectedProgramId();
+
+      <section class="tl-hero">
+        <div class="tl-hero-inner">
+          <div class="tl-hero-info">
+            <div class="tl-hero-badges">
+              <span class="tl-badge tl-badge--active">Active Program</span>
+              @if (enroll?.id) {
+                <span class="tl-badge tl-badge--enroll">Enroll ID: #{{ enroll!.id }}</span>
+              }
+            </div>
+            <h2 class="tl-hero-title">{{ prog?.name || 'Program' }}</h2>
+            <div class="tl-hero-meta">
+              <span class="tl-hero-meta-item">
+                <mat-icon>calendar_today</mat-icon>
+                Week {{ currentWeekNumber() }} of {{ totalWeeks() }}
+              </span>
+              <span class="tl-hero-meta-item">
+                <mat-icon>group</mat-icon>
+                Cohort Members
+              </span>
+            </div>
+          </div>
+          <div class="tl-hero-progress-block">
+            <div class="tl-progress-label-row">
+              <span class="tl-progress-label">Overall Progress</span>
+              <span class="tl-progress-value">{{ overallProgress() }}%</span>
+            </div>
+            <div class="tl-progress-track">
+              <div class="tl-progress-fill" [style.width.%]="overallProgress()"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      @if (forbiddenDetails().length > 0) {
+        <div class="tl-403-banner">
+          <mat-icon>warning_amber</mat-icon>
+          <div>
+            <strong>Some data could not be loaded due to access restrictions:</strong>
+            <ul>
+              @for (d of forbiddenDetails(); track d) { <li>{{ d }}</li> }
+            </ul>
+          </div>
+        </div>
+      }
+
+      @if (weeks().length === 0) {
+        <div class="tl-state">
+          <mat-icon>event_busy</mat-icon>
+          <h3>No weeks available</h3>
+          <p>Program weeks have not been configured yet.</p>
+        </div>
+      } @else {
+        <section class="tl-section">
+          <h3 class="tl-section-title">Learning Journey Timeline</h3>
+
+          <div class="tl-timeline">
+            @for (wd of weeks(); track wd.week.id; let last = $last) {
+              <div class="tl-item" [class.tl-item--last]="last">
+                <div class="tl-node-wrap">
+                  <div class="tl-node"
+                    [class.tl-node--done]="wd.completed"
+                    [class.tl-node--current]="wd.current"
+                    [class.tl-node--locked]="wd.upcoming">
+                    @if (wd.completed) {
+                      <mat-icon class="tl-node-icon tl-node-icon--fill">check_circle</mat-icon>
+                    } @else if (wd.current) {
+                      <mat-icon class="tl-node-icon tl-node-icon--fill">play_circle</mat-icon>
+                    } @else {
+                      <mat-icon class="tl-node-icon">lock</mat-icon>
+                    }
+                  </div>
+                  @if (!last) { <div class="tl-line"></div> }
+                </div>
+
+                <div class="tl-card"
+                  [class.tl-card--done]="wd.completed"
+                  [class.tl-card--current]="wd.current"
+                  [class.tl-card--locked]="wd.upcoming"
+                  (click)="toggleWeek(wd.week.id)">
+                  <div class="tl-card-body">
+                    <div class="tl-card-row">
+                      <div class="tl-card-content">
+                        <div class="tl-card-header">
+                          <h4 class="tl-card-title">Week {{ wd.week.weekNumber }}: {{ wd.week.topic || 'Week ' + wd.week.weekNumber }}</h4>
+                          <span class="tl-status"
+                            [class.tl-status--done]="wd.completed"
+                            [class.tl-status--current]="wd.current"
+                            [class.tl-status--locked]="wd.upcoming">
+                            @if (wd.completed) { COMPLETED }
+                            @else if (wd.current) { IN PROGRESS }
+                            @else { LOCKED }
+                          </span>
+                        </div>
+
+                        <p class="tl-card-desc">{{ wd.week.description || 'No description available.' }}</p>
+
+                        <div class="tl-card-metrics">
+                          <div class="tl-metric">
+                            <span class="tl-metric-label">Attendance</span>
+                            <span class="tl-metric-value">{{ wd.attendance.percentage }}%</span>
+                          </div>
+                          <div class="tl-metric tl-metric--border">
+                            <span class="tl-metric-label">Assignment</span>
+                            <span class="tl-metric-value"
+                              [class.tl-metric--reviewed]="wd.employeeSubmission?.status === 'evaluated' || wd.employeeSubmission?.status === 'reviewed'"
+                              [class.tl-metric--submitted]="wd.employeeSubmission?.status === 'submitted'">
+                              @if (wd.employeeSubmission?.marks != null && (wd.employeeSubmission?.status === 'evaluated' || wd.employeeSubmission?.status === 'reviewed')) {
+                                {{ wd.employeeSubmission!.marks }}/100
+                              } @else if (wd.employeeSubmission) {
+                                {{ wd.employeeSubmission.status === 'submitted' ? 'Submitted' : 'Pending' }}
+                              } @else {
+                                {{ wd.assignments.length > 0 ? wd.assignments.length + ' Assignment' + (wd.assignments.length > 1 ? 's' : '') : '\u2014' }}
+                              }
+                            </span>
+                          </div>
+                          @if (wd.videoAvailable) {
+                            <div class="tl-metric tl-metric--border">
+                              <span class="tl-metric-label">Session</span>
+                              <span class="tl-metric-value tl-metric--video">
+                                <mat-icon>play_circle</mat-icon> Available
+                              </span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="tl-card-side">
+                        @if (wd.completed) {
+                          <span class="tl-finished">
+                            <mat-icon>event_available</mat-icon>
+                            Finished {{ wd.week.endDate | date:'MMM d, yyyy' }}
+                          </span>
+                        }
+                        @if (wd.current) {
+                          <span class="tl-deadline">
+                            <mat-icon>timer</mat-icon> {{ daysLabel(daysRemaining(wd.week.endDate)) }}
+                          </span>
+                          <span class="tl-deadline-date">Deadline: {{ wd.week.endDate | date:'MMM d, yyyy' }}</span>
+                        }
+                        <mat-icon class="tl-chevron">{{ selectedWeekId() === wd.week.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+                      </div>
+                    </div>
+                  </div>
+
+                  @if (selectedWeekId() === wd.week.id) {
+                    <div class="tl-current-details">
+                      <div class="tl-details-grid">
+                        <div class="tl-activities">
+                          <h5 class="tl-details-title">Weekly Activities</h5>
+
+                          @if (wd.videoAvailable) {
+                            <div class="tl-activity tl-activity--video" (click)="showVideo(progId, wd.week.id, wd); $event.stopPropagation()">
+                              <div class="tl-video-thumb">
+                                <mat-icon class="tl-video-play-icon">play_circle</mat-icon>
+                              </div>
+                              <div class="tl-video-info">
+                                <p class="tl-activity-title">{{ wd.videoDisplayTitle ?? wd.week.topic || 'Recorded Session' }}</p>
+                                <p class="tl-activity-meta">
+                                  @if (wd.videoDuration) { {{ wd.videoDuration }} &middot; }
+                                  Week {{ wd.week.weekNumber }}
+                                </p>
+                              </div>
+                              <span class="tl-video-badge">Watch</span>
+                            </div>
+                          } @else if (!wd.videoAvailable && !wd.current && wd.completed) {
+                            <div class="tl-activity">
+                              <mat-icon class="tl-activity-icon tl-activity-icon--empty">videocam_off</mat-icon>
+                              <div>
+                                <p class="tl-activity-title">Recorded session is not available yet.</p>
+                              </div>
+                            </div>
+                          } @else if (!wd.videoAvailable) {
+                            <div class="tl-activity">
+                              <mat-icon class="tl-activity-icon tl-activity-icon--empty">videocam_off</mat-icon>
+                              <div>
+                                <p class="tl-activity-title">Recorded session is not available yet.</p>
+                              </div>
+                            </div>
+                          }
+
+                          @for (a of wd.assignments; track a.id) {
+                            <div class="tl-activity"
+                              [class.tl-activity--active]="a.available"
+                              [class.tl-activity--done]="a.closed && wd.employeeSubmission != null"
+                              [class.tl-activity--locked]="a.notStarted || (a.closed && !wd.employeeSubmission)">
+                              <mat-icon class="tl-activity-icon"
+                                [class.tl-activity-icon--check]="a.available || (a.closed && wd.employeeSubmission != null)"
+                                [class.tl-activity-icon--empty]="a.notStarted || (a.closed && !wd.employeeSubmission)">
+                                @if (a.available) { check_circle }
+                                @else if (a.closed && wd.employeeSubmission != null) { check_circle }
+                                @else if (a.notStarted) { schedule }
+                                @else { cancel }
+                              </mat-icon>
+                              <div>
+                                <p class="tl-activity-title">{{ a.title || 'Assignment' }}</p>
+                                <p class="tl-activity-meta">
+                                  @if (a.available) {
+                                    Due {{ a.endDate | date:'MMM d, yyyy' }}
+                                  } @else if (a.notStarted) {
+                                    Available from {{ a.startDate | date:'MMM d, yyyy' }}
+                                  } @else if (a.closed && wd.employeeSubmission != null) {
+                                    Submitted
+                                  } @else if (a.closed) {
+                                    Submission Closed
+                                  }
+                                </p>
+                              </div>
+                            </div>
+                          }
+
+                          @if (!wd.videoAvailable && wd.assignments.length === 0) {
+                            <div class="tl-activity">
+                              <mat-icon class="tl-activity-icon tl-activity-icon--empty">radio_button_unchecked</mat-icon>
+                              <div>
+                                <p class="tl-activity-title">No activities yet</p>
+                                <p class="tl-activity-meta">Content will appear when available</p>
+                              </div>
+                            </div>
+                          }
+                        </div>
+
+                        <div class="tl-assign-card">
+                          <h5 class="tl-details-title">Assignment Status</h5>
+                          <div class="tl-assign-header">
+                            <div class="tl-assign-icon">
+                              <mat-icon>assignment</mat-icon>
+                            </div>
+                            <div>
+                              <p class="tl-assign-name">{{ wd.assignments.length > 0 ? wd.assignments[0].title : 'Week ' + wd.week.weekNumber + ' Assignment' }}</p>
+                              <p class="tl-assign-count">{{ wd.assignments.length }} available</p>
+                            </div>
+                          </div>
+                          @if (wd.employeeSubmission) {
+                            <span class="tl-assign-badge"
+                              [class.tl-assign-badge--scored]="wd.employeeSubmission.status === 'evaluated' || wd.employeeSubmission.status === 'reviewed'"
+                              [class.tl-assign-badge--pending]="wd.employeeSubmission.status === 'submitted'">
+                              {{ submissionBadgeLabel(wd.employeeSubmission) }}
+                            </span>
+                          }
+                          <a [routerLink]="['/employee/programs', progId, 'weeks', wd.week.id]" class="tl-assign-btn">
+                            Go To Week <mat-icon>launch</mat-icon>
+                          </a>
+                        </div>
+                      </div>
+
+                      @if (wd.evaluation) {
+                        <div class="tl-eval-row">
+                          <span class="tl-eval-chip">
+                            <span class="tl-eval-label">Engagement:</span>
+                            <span class="tl-eval-score tl-eval-score--good">{{ wd.evaluation.engagementScore != null ? getEvalLabel(wd.evaluation.engagementScore) : 'N/A' }}</span>
+                          </span>
+                          <span class="tl-eval-chip">
+                            <span class="tl-eval-label">Application:</span>
+                            <span class="tl-eval-score tl-eval-score--strong">{{ wd.evaluation.applicationScore != null ? getEvalLabel(wd.evaluation.applicationScore) : 'N/A' }}</span>
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="tl-stats-grid">
+          <div class="tl-stat-card">
+            <span class="tl-stat-card-label">Avg. Attendance</span>
+            <span class="tl-stat-card-value">{{ avgAttendance() }}%</span>
+            <div class="tl-stat-card-footer">
+              <mat-icon>trending_up</mat-icon> Across {{ totalWeeks() }} weeks
+            </div>
+          </div>
+          <div class="tl-stat-card">
+            <span class="tl-stat-card-label">Weeks Completed</span>
+            <span class="tl-stat-card-value">{{ completedWeeksCount() }}/{{ totalWeeks() }}</span>
+            <div class="tl-stat-card-footer">{{ overallProgress() }}% overall</div>
+          </div>
+          <div class="tl-stat-card">
+            <span class="tl-stat-card-label">Avg. Assignment Score</span>
+            <span class="tl-stat-card-value">{{ avgAssignmentScore() ?? 'N/A' }}</span>
+            <div class="tl-stat-card-footer">Scored submissions</div>
+          </div>
+          <div class="tl-stat-card">
+            <span class="tl-stat-card-label">Current Week</span>
+            <span class="tl-stat-card-value">Week {{ currentWeekNumber() || '\u2014' }}</span>
+            <div class="tl-stat-card-footer">{{ currentWeekNumber() > 0 ? 'In progress' : 'Not started' }}</div>
+          </div>
+        </section>
+      }
+    }
+    }
+  }
+</div>
+
+<app-video-player-modal #videoPlayer></app-video-player-modal>

@@ -1,0 +1,112 @@
+<div class="fb-page">
+  <app-back-nav fallbackRoute="/employee" />
+  <div class="fb-header-card">
+    <div class="fb-header-main">
+      <div class="fb-header-info">
+        <h1 class="fb-title">
+          <span class="material-symbols-outlined fb-title-icon">feedback</span>
+          Feedback
+        </h1>
+        <p class="fb-subtitle">View evaluator feedback across your programs and weeks</p>
+      </div>
+
+      @if (!isLoading() && programs().length > 0) {
+        <div class="fb-filter-row">
+          <div class="fb-filter-item">
+            <label class="fb-filter-label">Program Track</label>
+            <p-dropdown
+              [options]="programs()"
+              optionLabel="name"
+              optionValue="id"
+              [ngModel]="selectedProgramId()"
+              (ngModelChange)="onProgramChange($event)"
+              placeholder="Select a program"
+              styleClass="as-dropdown-control">
+            </p-dropdown>
+          </div>
+          <div class="fb-filter-item">
+            <label class="fb-filter-label">Program Week</label>
+            <p-dropdown
+              [options]="formattedWeeks()"
+              optionLabel="label"
+              optionValue="id"
+              [ngModel]="selectedWeekId()"
+              (ngModelChange)="onWeekChange($event)"
+              placeholder="Select a week"
+              styleClass="as-dropdown-control">
+            </p-dropdown>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (isLoading() && feedbackRecords().length === 0 && !isForbidden()) {
+    <div class="fb-loading">
+      @for (_ of [1,2]; track $index) { <div class="fb-skeleton"></div> }
+    </div>
+  } @else {
+
+    @if (errorMessage() && !isForbidden() && feedbackRecords().length === 0) {
+      <div class="fb-notification">{{ errorMessage() }}</div>
+    }
+
+    @if (isForbidden()) {
+      <div class="fb-error-banner">
+        <span class="material-symbols-outlined">lock</span>
+        <div>
+          <h3>Access Denied</h3>
+          <p>{{ errorMessage() }}</p>
+          <p class="fb-error-hint">The feedback endpoint may require backend updates to allow employee self-access. Please ask your administrator to check the authorization on <code>GET /feedback/by-weekly-evaluation/&#123;id&#125;</code>.</p>
+        </div>
+      </div>
+    }
+
+    @if (feedbackRecords().length > 0) {
+      <div class="fb-cards">
+        @for (fb of feedbackRecords(); track fb.feedbackId) {
+          <div class="fb-card" [class.fb-card--positive]="feedbackTypeClass(fb.feedbackTypeName) === 'positive'"
+               [class.fb-card--negative]="feedbackTypeClass(fb.feedbackTypeName) === 'negative'">
+            <div class="fb-card-top">
+              <div class="fb-type-row">
+                <span class="fb-type-icon">
+                  @if (feedbackTypeClass(fb.feedbackTypeName) === 'positive') {
+                    <span class="material-symbols-outlined fb-icon--filled">check_circle</span>
+                  } @else if (feedbackTypeClass(fb.feedbackTypeName) === 'negative') {
+                    <span class="material-symbols-outlined fb-icon--filled">report</span>
+                  } @else {
+                    <span class="material-symbols-outlined">info</span>
+                  }
+                </span>
+                <div>
+                  <span class="fb-type-name">{{ fb.feedbackTypeName || fb.feedbackTypeCode || 'Feedback' }}</span>
+                  @if (fb.weeklyEvaluationId) {
+                    <span class="fb-eval-ref">Weekly Eval #{{ fb.weeklyEvaluationId }}</span>
+                  }
+                </div>
+              </div>
+              <span class="fb-date">{{ fb.createdAt | date:'MMM d, yyyy' }}</span>
+            </div>
+            <div class="fb-card-body">
+              <p class="fb-comment">{{ fb.feedbackComment || 'No comment provided.' }}</p>
+            </div>
+            @if (fb.feedbackScoreAdjustment) {
+              <div class="fb-card-footer">
+                <span class="fb-score-adjust">
+                  <span class="material-symbols-outlined">tune</span>
+                  Score Adjustment: {{ fb.feedbackScoreAdjustment > 0 ? '+' : '' }}{{ fb.feedbackScoreAdjustment }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    } @else if (selectedProgramId() && selectedWeekId() && !isLoading() && !errorMessage()) {
+      <div class="fb-empty">
+        <span class="material-symbols-outlined">feedback</span>
+        <h3>No feedback records</h3>
+        <p>No feedback has been provided for this week yet.</p>
+      </div>
+    }
+  }
+</div>
