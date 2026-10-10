@@ -1,0 +1,10 @@
+id,name,description
+4bb1619e-7fcd-59a6-b008-7f140728c2dc,ProgramStatus,Status values for a program
+e1b88bfd-bd28-52aa-9fad-462c711f1211,EnrollmentStatus,Status values for an employee enrollment
+bc8b82de-e8dc-56c4-9ed4-da3fb70faf8b,EmployeeAssignmentStatus,Status values for an employee assignment submission
+71eeb347-eabc-5e35-a2d6-b6e73d338335,AttendanceStatus,Status values for attendance records
+c0fe5c5c-fcba-5aa5-b8e1-0c0596aaf058,NotificationType,Types of notifications dispatched to users
+39158c93-6dc7-5c72-9393-b82ed45cb223,FeedbackType,Types of feedback given on a weekly evaluation
+953a4f5d-4f8f-5070-a277-1b4bcc57615a,Gender,Gender values for a user
+16eb8c7e-7c8f-5bf6-9a3c-348f2ba08d20,Status,Common active/inactive status shared by Organization and User
+6aeb4c0f-b19b-59da-9617-583d376fa8e7,FileType,Allowed file types for assignment submissions

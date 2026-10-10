@@ -1,0 +1,16 @@
+@ApiGateway_HostAddress = http://localhost:5199
+
+### Identity Service
+GET {{ApiGateway_HostAddress}}/api/v1/auth
+
+### Program Service
+GET {{ApiGateway_HostAddress}}/api/v1/program
+
+### MetaData Service
+GET {{ApiGateway_HostAddress}}/api/v1/metadata
+
+### Evaluation Service
+GET {{ApiGateway_HostAddress}}/api/v1/enrollment/1/weekly-evaluation
+
+### Notification Service
+GET {{ApiGateway_HostAddress}}/api/v1/notifications

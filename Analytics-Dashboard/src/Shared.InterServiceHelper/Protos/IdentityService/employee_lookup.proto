@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option csharp_namespace = "Shared.InterServiceHelper.Grpc.Identity";
+
+package identity;
+
+service IdentityLookupService {
+  rpc GetEmployeeById (GetEmployeeByIdRequest) returns (EmployeeResponse);
+  rpc GetEmployeesByOrganization (GetEmployeesByOrganizationRequest) returns (GetEmployeesByOrganizationResponse);
+}
+
+message GetEmployeeByIdRequest {
+  string employee_id = 1;
+}
+
+message EmployeeResponse {
+  bool exists = 1;
+  string id = 2;
+  string full_name = 3;
+  string email = 4;
+  bool is_active = 5;
+  int64 organization_id = 6;
+}
+
+message GetEmployeesByOrganizationRequest {
+  int64 organization_id = 1;
+}
+
+message EmployeeListItem {
+  string id = 1;
+  string full_name = 2;
+  string email = 3;
+  bool is_active = 4;
+  int64 organization_id = 5;
+}
+
+message GetEmployeesByOrganizationResponse {
+  repeated EmployeeListItem employees = 1;
+}

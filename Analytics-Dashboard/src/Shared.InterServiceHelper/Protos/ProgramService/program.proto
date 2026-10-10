@@ -1,0 +1,98 @@
+syntax = "proto3";
+option csharp_namespace = "Shared.InterServiceHelper.Grpc.Program";
+package program;
+
+service ProgramGrpcService {
+  rpc GetProgram (GetProgramRequest) returns (GetProgramResponse);
+  rpc GetProgramWeek (GetProgramWeekRequest) returns (GetProgramWeekResponse);
+  rpc GetAssignment (GetAssignmentRequest) returns (GetAssignmentResponse);
+  rpc GetEnrollment (GetEnrollmentRequest) returns (GetEnrollmentResponse);
+  rpc ValidateEmployeeEnrollment (ValidateEmployeeEnrollmentRequest) returns (ValidateEmployeeEnrollmentResponse);
+  rpc GetEmployeeAssignmentById (GetEmployeeAssignmentByIdRequest) returns (GetEmployeeAssignmentByIdResponse);
+}
+
+message GetProgramRequest {
+  int64 program_id = 1;
+}
+message GetProgramResponse {
+  bool found = 1;
+  int64 program_id = 2;
+  int64 organization_id = 3;
+  string evaluator_id = 4;
+  string name = 5;
+  string description = 6;
+  int32 duration_weeks = 7;
+  string status_id = 8;
+}
+
+message GetProgramWeekRequest {
+  int64 program_week_id = 1;
+  int64 program_id = 2;
+}
+message GetProgramWeekResponse {
+  bool found = 1;
+  int64 id = 2;
+  int64 program_id = 3;
+  int32 week_number = 4;
+  string title = 5;
+  string description = 6;
+}
+
+message GetAssignmentRequest {
+  int64 assignment_id = 1;
+  int64 program_id = 2;
+  int64 program_week_id = 3;
+}
+message GetAssignmentResponse {
+  bool found = 1;
+  int64 id = 2;
+  int64 program_id = 3;
+  int64 program_week_id = 4;
+  string file_type_id = 5;
+  string title = 6;
+  string description = 7;
+  string start_date = 8;
+  string end_date = 9;
+  int32 max_marks = 10;
+}
+
+message GetEnrollmentRequest {
+  int64 enrollment_id = 1;
+}
+message GetEnrollmentResponse {
+  bool found = 1;
+  int64 id = 2;
+  int64 program_id = 3;
+  string employee_id = 4;
+  int32 current_week = 5;
+  string status_id = 6;
+  bool is_active = 7;
+}
+
+message ValidateEmployeeEnrollmentRequest {
+  string employee_id = 1;
+  int64 program_id = 2;
+}
+message ValidateEmployeeEnrollmentResponse {
+  bool is_enrolled = 1;
+  int64 enrollment_id = 2;
+  int32 current_week = 3;
+}
+
+message GetEmployeeAssignmentByIdRequest {
+  int64 employee_assignment_id = 1;
+}
+message GetEmployeeAssignmentByIdResponse {
+  bool found = 1;
+  int64 employee_assignment_id = 2;
+  int64 assignment_id = 3;
+  int64 enrollment_id = 4;
+  string employee_id = 5;
+  int64 program_id = 6;
+  int64 program_week_id = 7;
+  optional double marks = 8;
+  int32 max_marks = 9;
+  string reviewer_comment = 10;
+  string status_id = 11;
+  bool is_active = 12;
+}

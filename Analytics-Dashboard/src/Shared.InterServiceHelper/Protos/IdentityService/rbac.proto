@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "Shared.InterServiceHelper.Grpc.Rbac";
+
+package rbac;
+
+// Exposed by IdentityService. Any other service that needs to check whether
+// a user is allowed to use a given feature calls this instead of duplicating
+// RBAC logic or querying IdentityService's database directly.
+service RbacService {
+  rpc CheckFeatureAccess (CheckFeatureAccessRequest) returns (CheckFeatureAccessResponse);
+}
+
+message CheckFeatureAccessRequest {
+  string user_id = 1;
+  string feature_code = 2;
+}
+
+message CheckFeatureAccessResponse {
+  bool is_allowed = 1;
+}

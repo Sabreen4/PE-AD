@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+option csharp_namespace = "Shared.InterServiceHelper.Grpc.MetaData";
+
+package metadata;
+
+// Exposed by MetaDataService. Any other service that owns a RefSet key
+// calls this to resolve the RefTerms that belong to it, instead of
+// duplicating reference-data lookups in its own database.
+service MetaDataGrpcService {
+  // Resolve all RefTerms belonging to a single RefSet.
+  rpc GetRefTermsBySet (GetRefTermsBySetRequest) returns (GetRefTermsBySetResponse);
+
+  // Resolve RefTerms for multiple RefSets in one round trip.
+  rpc GetRefTermsBySets (GetRefTermsBySetsRequest) returns (GetRefTermsBySetsResponse);
+
+  // Resolve a single RefTerm by its Id (Guid).
+  rpc GetRefTermById (GetRefTermByIdRequest) returns (GetRefTermByIdResponse);
+}
+
+message GetRefTermByIdRequest {
+  string ref_term_id = 1;
+}
+
+message GetRefTermByIdResponse {
+  bool found = 1;
+  RefTermDto ref_term = 2;
+}
+
+message RefTermDto {
+  string id = 1;
+  string key = 2;
+  string description = 3;
+}
+
+message GetRefTermsBySetRequest {
+  // RefSet.Key, e.g. "ORDER_STATUS"
+  string ref_set_key = 1;
+}
+
+message GetRefTermsBySetResponse {
+  // False if no RefSet with the given key exists.
+  bool found = 1;
+  repeated RefTermDto ref_terms = 2;
+}
+
+message GetRefTermsBySetsRequest {
+  repeated string ref_set_keys = 1;
+}
+
+message RefSetTerms {
+  string ref_set_key = 1;
+  bool found = 2;
+  repeated RefTermDto ref_terms = 3;
+}
+
+message GetRefTermsBySetsResponse {
+  repeated RefSetTerms results = 1;
+}

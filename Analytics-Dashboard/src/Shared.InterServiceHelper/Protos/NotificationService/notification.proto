@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option csharp_namespace = "Shared.InterServiceHelper.Grpc.Notification";
+
+package notification;
+
+service NotificationService {
+  rpc SendRegistrationEmail (SendRegistrationEmailRequest) returns (SendEmailResponse);
+  rpc SendOtpEmail (SendOtpEmailRequest) returns (SendEmailResponse);
+  rpc SendInAppNotification (SendInAppNotificationRequest) returns (SendInAppNotificationResponse);
+}
+
+message SendRegistrationEmailRequest {
+  string email = 1;
+  string first_name = 2;
+  string login_link = 3;
+}
+
+message SendOtpEmailRequest {
+  string email = 1;
+  string otp = 2;
+  int32 expiry_minutes = 3;
+}
+
+message SendEmailResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message SendInAppNotificationRequest {
+  string user_id = 1;
+  string title = 2;
+  string message = 3;
+}
+
+message SendInAppNotificationResponse {
+  bool success = 1;
+  string message = 2;
+}

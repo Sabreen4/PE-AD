@@ -1,0 +1,103 @@
+# Build outputs
+bin/
+obj/
+publish/
+
+# Test results
+TestResults/
+CoverageReport/
+*.cobertura.xml
+coverage.json
+
+# Logs
+logs/
+*.log
+log-*.txt
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+nuget.config.user
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+*.userprefs
+.vscode/
+!.vscode/extensions.json
+
+# OS
+*.DS_Store
+Thumbs.db
+desktop.ini
+
+# Config
+appsettings*.json
+
+# Misc
+*.swp
+*.tmp
+*.temp
+*.zip
+.env
+.env.*
+docker-compose.override.yml
+
+# Uploads
+# Build outputs
+bin/
+obj/
+publish/
+
+# Test results
+TestResults/
+CoverageReport/
+*.cobertura.xml
+coverage.json
+
+# Logs
+logs/
+*.log
+log-*.txt
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+nuget.config.user
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+*.userprefs
+.vscode/
+!.vscode/extensions.json
+
+# OS
+*.DS_Store
+Thumbs.db
+desktop.ini
+
+# Config
+appsettings*.json
+
+# Misc
+*.swp
+*.tmp
+*.temp
+*.zip
+.env
+.env.*
+docker-compose.override.yml
+
+# Uploads
+**/wwwroot/uploads/profiles/
+
+
